@@ -1,0 +1,1847 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package hmi.gwt.webif.base.dialog;
+
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.dom.client.StyleInjector;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.core.client.util.ToggleGroup;
+import com.sencha.gxt.widget.core.client.Component;
+import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.box.MessageBox;
+import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.SimpleContainer;
+import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.form.Radio;
+import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.info.Info;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.tips.ToolTipConfig;
+import hmi.basedialog.gwt.LayoutConstants;
+import hmi.basedialog.gwt.OperationCallback;
+import hmi.basedialog.gwt.TranslatableInterface;
+import hmi.basedialog.gwt.container.AbstractContainer;
+import hmi.basedialog.gwt.container.CellConditionEnabledModel;
+import hmi.basedialog.gwt.container.DataPanel;
+import hmi.basedialog.gwt.container.DataPanelBuilder;
+import hmi.basedialog.gwt.container.DynamicRecordContainer;
+import hmi.basedialog.gwt.container.RecordContainer;
+import hmi.basedialog.gwt.container.SQLGrid;
+import hmi.basedialog.gwt.container.TabbedPane;
+import hmi.basedialog.gwt.container.TableContainer;
+import hmi.basedialog.gwt.container.VerticalMultiDataManager;
+import hmi.basedialog.gwt.converter.I2SAsDecimalConverter;
+import hmi.basedialog.gwt.converter.L2LAsMinutesConverter;
+import hmi.basedialog.gwt.element.RecordContainerElement;
+import hmi.basedialog.gwt.element.RecordContainerElementBuilder;
+import hmi.basedialog.gwt.element.TableContainerElementBuilder;
+import hmi.basedialog.gwt.model.Action;
+import hmi.basedialog.gwt.model.Operation;
+import hmi.basedialog.gwt.recordEditor.AbstractColumnMapper;
+import hmi.basedialog.gwt.recordEditor.ComboBoxEditor;
+import hmi.basedialog.gwt.recordEditor.Editor;
+import hmi.basedialog.gwt.recordEditor.PortLEDEditor;
+import hmi.basedialog.gwt.recordEditor.RadioButtonEditor;
+import hmi.basedialog.gwt.recordEditor.TextFieldEditor;
+import hmi.basedialog.gwt.recordEditor.TextFieldWithWidgetEditor;
+import hmi.basedialog.gwt.tableEditor.CheckBoxCell;
+import hmi.basedialog.gwt.tableEditor.TableCheckBoxEditor;
+import hmi.basedialog.gwt.tableEditor.TableComboBoxEditor;
+import hmi.basedialog.gwt.tableEditor.TableEditor;
+import hmi.basedialog.gwt.tableEditor.TableTextFieldEditor;
+import hmi.basedialog.gwt.utils.InterfaceFilter;
+import hmi.basedialog.gwt.utils.Utils;
+import hmi.basedialog.gwt.widget.CustomCssFramedPanel;
+import hmi.basedialog.gwt.widget.CustomFieldLabel;
+import hmi.basedialog.gwt.widget.CustomHBoxLayoutContainer;
+import hmi.basedialog.gwt.widget.CustomInformationMessageBox;
+import hmi.basedialog.gwt.widget.CustomMenuItem;
+import hmi.basedialog.gwt.widget.CustomSelectionHandler;
+import hmi.basedialog.gwt.widget.CustomVBoxLayoutContainer;
+import hmi.basedialog.gwt.widget.CustomVerticalLayoutContainer;
+import hmi.basedialog.gwt.widget.DialogBuilder;
+import hmi.basedialog.gwt.widget.FlexibleFramedPanel;
+import hmi.basedialog.gwt.widget.OperationFramedPanel;
+import hmi.basedialog.gwt.widget.VerticalFramedPanel;
+import hmi.basedialog.shared.converter.Ba2SAsBITSConverter;
+import hmi.basedialog.shared.converter.ChainConverter;
+import hmi.basedialog.shared.converter.I2BAsEnabledStatusConverter;
+import hmi.basedialog.shared.converter.I2LConverter;
+import hmi.basedialog.shared.converter.L2SAsDurationConverter;
+import hmi.basedialog.shared.converter.L2SAsNetmaskConverter;
+import hmi.basedialog.shared.converter.O2SAsMapConverter;
+import hmi.basedialog.shared.converter.S2SAsMacAddressConverter;
+import hmi.basedialog.shared.converter.S2SAsMauTypeConverter;
+import hmi.basedialog.shared.model.Entry;
+import hmi.gwt.utils.ReachabilityChecker;
+import hmi.gwt.webif.base.constants.mib.HM2_DEVMGMT_MIB;
+import hmi.gwt.webif.base.constants.mib.HM2_DEVMGMT_MIB.HM2_DEVICE_EXT_NVM_TYPE;
+import hmi.gwt.webif.base.constants.mib.HM2_DEVMGMT_MIB.HM2_DEV_MGMT_SW_FILE_LOCATION;
+import hmi.gwt.webif.base.constants.mib.HM2_DEVMGMT_MIB.HM2_IFACE_AUTO_POWER_DOWN;
+import hmi.gwt.webif.base.constants.mib.HM2_DEVMGMT_MIB.HM2_IFACE_CABLE_CROSSING;
+import hmi.gwt.webif.base.constants.mib.HM2_DEVMGMT_MIB.HM2_MODULE_STATUS;
+import hmi.gwt.webif.base.constants.mib.HM2_FAN_MIB.HM2_FAN_MODULE_MGMT_STATUS;
+import hmi.gwt.webif.base.constants.mib.HM2_FILEMGMT_MIB;
+import hmi.gwt.webif.base.constants.mib.HM2_NETCONFIG_MIB.HM2_NET_ACTION;
+import hmi.gwt.webif.base.constants.mib.HM2_NETCONFIG_MIB.HM2_NET_CONFIG_PROTOCOL;
+import hmi.gwt.webif.base.constants.mib.HM2_NETCONFIG_MIB.HM2_NET_OOB_ACTION;
+import hmi.gwt.webif.base.constants.mib.HM2_NETCONFIG_MIB.HM2_NET_OOB_CONFIG_PROTOCOL;
+import hmi.gwt.webif.base.constants.mib.HM2_TC_MIB;
+import hmi.gwt.webif.base.dialog.utils.DialogUtilities;
+import hmi.gwt.webif.base.dialog.utils.DpFileManagementTask;
+import hmi.gwt.webif.base.main.ApplicationData;
+import hmi.gwt.webif.base.resources.ImageResources;
+import hmi.gwt.webif.base.resources.WebIfResources;
+import hmi.network.base.constants.URLBuilder;
+import hmi.network.base.asn1.RPNCharacteristic;
+import hmi.network.base.constants.MauTypeConstants;
+import hmi.network.base.types.PortList;
+import hmi.network.base.utils.BitSetUtils;
+import hmi.network.base.utils.InetAddressUtils;
+import hmi.network.mib.MibEnumeration;
+import hmi.network.mib.constants.IANAifType_MIB;
+import hmi.network.mib.constants.MAU_MIB;
+import hmi.network.sql_lite.AbstractStmt;
+import hmi.network.sql_lite.DMLStmt;
+import hmi.network.sql_lite.MibStatement;
+import hmi.network.sql_lite.NavigableResultSet;
+import hmi.network.sql_lite.Pair;
+import hmi.network.sql_lite.SQLDataProvider;
+import hmi.network.sql_lite.SQLUtils;
+import hmi.network.sql_lite.UpdateStmt;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Contains Configuration, External Memory, Network, Port, Reboot, System and
+ * Software dialogs.
+ *
+ * @author Ediz Turcan ediz.turcan@belden.com
+ */
+public class GeneralDialogs {
+
+    public static DataPanelBuilder createSystemDialog(final ApplicationData applicationData) throws Exception {
+
+        DataPanelBuilder dp = applicationData.getDataPanelBuilder();
+
+        VerticalMultiDataManager md = new VerticalMultiDataManager();
+
+        CustomVBoxLayoutContainer mainPanel = applicationData.getVBox().build();
+
+        CustomHBoxLayoutContainer topContainer = applicationData.getHBox().build();
+        CustomHBoxLayoutContainer.setFlex(1);
+
+        VerticalFramedPanel deviceStatusFrame = new CustomCssFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_system_frame_device_status"), "statusFrame");
+        deviceStatusFrame.setFieldLabelWidth(140);
+        topContainer.add(deviceStatusFrame);
+
+        VerticalFramedPanel securityStatusFrame = new CustomCssFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_system_frame_security_status"), "statusFrame");
+        securityStatusFrame.setFieldLabelWidth(140);
+        topContainer.add(securityStatusFrame);
+
+        VerticalFramedPanel firstSignalContactStatusFrame = new CustomCssFramedPanel(WebIfResources.INSTANCE.getFormattedDialogString("dialog_system_frame_signal_contact_status", 1), "statusFrame");
+        firstSignalContactStatusFrame.setFieldLabelWidth(140);
+        topContainer.add(firstSignalContactStatusFrame, "\"HMFID_SW_DEVMON_001\" #isFeatureActive");
+
+        VerticalFramedPanel secondSignalContactStatusFrame = new CustomCssFramedPanel(WebIfResources.INSTANCE.getFormattedDialogString("dialog_system_frame_signal_contact_status", 2), "statusFrame");
+        secondSignalContactStatusFrame.setFieldLabelWidth(140);
+
+        topContainer.add(secondSignalContactStatusFrame, "\"HM2-DIAGNOSTIC-MIB::hm2SigConCommonEntry\" #count 2 ==");
+
+        mainPanel.add(topContainer);
+
+        CustomHBoxLayoutContainer middleContainer = applicationData.getHBox().build();
+
+        FlexibleFramedPanel systemDataFrame = new FlexibleFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_system_frame_system_data"), 5);
+        systemDataFrame.setFieldLabelWidth(160);
+        middleContainer.add(systemDataFrame);
+
+        CustomHBoxLayoutContainer.resetFlex();
+
+        VerticalFramedPanel ledStatusFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_system_frame_led_data"), 1);
+        ledStatusFrame.setFieldLabelWidth(50);
+
+        middleContainer.add(ledStatusFrame, "\"HMFID_HW_HWE_007\" #isFeatureActive !");
+
+        mainPanel.add(middleContainer);
+
+        md.add(applicationData.getRecordContainerBuilder()
+                .setContentWidget(mainPanel).setAttributeNames(RecordContainerElementBuilder.create().setId("devMonStatusCount").setEditor(createStatusCounterEditor("devMonStatusCount")).setParentWidget(deviceStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("devSecStatusCount").setEditor(createStatusCounterEditor("devSecStatusCount")).setParentWidget(securityStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("sigConStatusCount_1").setEditor(createStatusCounterEditor("sigConStatusCount_1")).setParentWidget(firstSignalContactStatusFrame)
+                        .setVisible("\"HMFID_SW_DEVMON_001\" #isFeatureActive").build(),
+                RecordContainerElementBuilder.create().setId("sigConStatusCount_2").setEditor(createStatusCounterEditor("sigConStatusCount_2")).setParentWidget(secondSignalContactStatusFrame)
+                        .setVisible("\"HM2-DIAGNOSTIC-MIB::hm2SigConCommonEntry\" #count 2 ==").build(),
+                RecordContainerElementBuilder.create().setId("sysName").setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("sysLocation").setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("sysContact").setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("deviceType").setParentWidget(systemDataFrame).setEditor(new TextFieldEditor(new DeviceTypeColumnMapper())).build(),
+                RecordContainerElementBuilder.create().setId("powerSupply1_hm2PSState").setEditor(TextFieldEditor.createMibEnumTextFieldEditor()).setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("powerSupply2_hm2PSState").setEditor(TextFieldEditor.createMibEnumTextFieldEditor()).setParentWidget(systemDataFrame).setVisible("\"HM2-PWRMGMT-MIB::hm2PSEntry\" #count 2 ==").build(),
+                RecordContainerElementBuilder.create().setId("sysUpTime").setEditor(new TextFieldEditor(L2SAsDurationConverter.INSTANCE)).setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("hm2DevMgmtTemperature").setVisible("\"HMFID_HW_HWE_002\" #isFeatureActive").setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("hm2DevMgmtTemperatureUpperLimit").setVisible("\"HMFID_HW_HWE_002\" #isFeatureActive").setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("hm2DevMgmtTemperatureLowerLimit").setVisible("\"HMFID_HW_HWE_002\" #isFeatureActive").setParentWidget(systemDataFrame).build(),
+                RecordContainerElementBuilder.create().setId("statusLED_hm2LedGlobalStatus").setVisible("\"HMFID_HW_HWE_007\" #isFeatureActive !").setEditor(new LEDStatusEditor()).setParentWidget(ledStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("powerLED_hm2LedGlobalStatus").setVisible("\"HMFID_HW_HWE_007\" #isFeatureActive !").setEditor(new LEDStatusEditor()).setParentWidget(ledStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("ringManagerLED_hm2LedGlobalStatus").setVisible("\"HMFID_SW_LED_001_01\" #isFeatureActive !").setEditor(new LEDStatusEditor()).setParentWidget(ledStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("acaLED_hm2LedGlobalStatus").setVisible("\"HMFID_HW_HWE_007\" #isFeatureActive !").setEditor(new LEDStatusEditor()).setParentWidget(ledStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("I1LED_hm2LedGlobalStatus").setVisible("\"HMFID_SW_IO_007\" #isFeatureActive").setEditor(new LEDStatusEditor()).setParentWidget(ledStatusFrame).build(),
+                RecordContainerElementBuilder.create().setId("I2LED_hm2LedGlobalStatus").setVisible("\"HMFID_SW_IO_007\" #isFeatureActive").setEditor(new LEDStatusEditor()).setParentWidget(ledStatusFrame).build()
+        )
+                .setSQLSelectStmt("select sysName, "
+                        + "sysLocation, "
+                        + "sysContact, "
+                        + "sysUpTime, "
+                        + "hm2DevMgmtHwVersion, "
+                        + "hm2DevMgmtProductDescr, "
+                        + "hm2DevMgmtTemperature, "
+                        + "hm2DevMgmtTemperatureUpperLimit, "
+                        + "hm2DevMgmtTemperatureLowerLimit, "
+                        + "powerSupply1.hm2PSID, "
+                        + "powerSupply1.hm2PSState as powerSupply1_hm2PSState, "
+                        + "powerSupply2.hm2PSID, "
+                        + "powerSupply2.hm2PSState as powerSupply2_hm2PSState, "
+                        + "statusLED.hm2LedGlobalStatus as statusLED_hm2LedGlobalStatus, "
+                        + "powerLED.hm2LedGlobalStatus as powerLED_hm2LedGlobalStatus, "
+                        + "ringManagerLED.hm2LedGlobalStatus as ringManagerLED_hm2LedGlobalStatus, "
+                        + "acaLED.hm2LedGlobalStatus as acaLED_hm2LedGlobalStatus, "
+                        + "I1LED.hm2LedGlobalStatus as I1LED_hm2LedGlobalStatus, "
+                        + "I2LED.hm2LedGlobalStatus as I2LED_hm2LedGlobalStatus, "
+                        + " (select count(*) as devMonStatusCount from HM2_DIAGNOSTIC_MIB.hm2DevMonStatusEntry), "
+                        + " (select count(*) as devSecStatusCount from HM2_DIAGNOSTIC_MIB.hm2DevSecStatusEntry), "
+                        + " (select count(*) as sigConStatusCount_1 from HM2_DIAGNOSTIC_MIB.hm2SigConStatusEntry where hm2SigConID = 1), "
+                        + " (select count(*) as sigConStatusCount_2 from HM2_DIAGNOSTIC_MIB.hm2SigConStatusEntry where hm2SigConID = 2) "
+                        + "from SNMPv2_MIB.system "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2DevMonCommonEntry on hm2DevMonCommonEntry.hm2DevMonID = 1 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2DevSecConfigGroup "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2SigConCommonEntry as sigCon1 on sigCon1.hm2SigConID = 1 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2SigConCommonEntry as sigCon2 on sigCon2.hm2SigConID = 2 "
+                        + "left join HM2_DEVMGMT_MIB.hm2DeviceMgmtGroup "
+                        + "left join HM2_DEVMGMT_MIB.hm2DeviceMgmtHardwareGroup "
+                        + "left join HM2_PWRMGMT_MIB.hm2PSEntry as powerSupply1 on powerSupply1.hm2PSID = 1 "
+                        + "left join HM2_PWRMGMT_MIB.hm2PSEntry as powerSupply2 on powerSupply2.hm2PSID = 2 "
+                        + "left join HM2_DEVMGMT_MIB.hm2DeviceMgmtTemperatureGroup "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2LedGlobalEntry as statusLED on statusLED.hm2LedGlobalLedType = 2 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2LedGlobalEntry as powerLED on powerLED.hm2LedGlobalLedType = 1 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2LedGlobalEntry as ringManagerLED on ringManagerLED.hm2LedGlobalLedType = 3 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2LedGlobalEntry as acaLED on acaLED.hm2LedGlobalLedType = 4 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2LedGlobalEntry as I1LED on I1LED.hm2LedGlobalLedType = 5 "
+                        + "left join HM2_DIAGNOSTIC_MIB.hm2LedGlobalEntry as I2LED on I2LED.hm2LedGlobalLedType = 6 ",
+                        "select * from HM2_DIAGNOSTIC_MIB.hm2DevMonStatusEntry",
+                        "select * from HM2_DIAGNOSTIC_MIB.hm2DevSecStatusEntry",
+                        "select * from HM2_DIAGNOSTIC_MIB.hm2SigConStatusEntry where hm2SigConID = 1",
+                        "select * from HM2_DIAGNOSTIC_MIB.hm2SigConStatusEntry where hm2SigConID = 2",
+                        "select hm2PSUSlotIndex,hm2PSUSlotSerialNumber,hm2PSUSlotProductCode from HM2_PWRMGMT_MIB.hm2PSUSlotInfoEntry")
+                .setGuiHook(new AbstractContainer.GuiHook<RecordContainer>() {
+
+                    @Override
+                    public void preUpdate(RecordContainer container) {
+                        createTrapCauseTooltip(container, container.getResultSetList().get(1).getEntryList(), container.getEditor("devMonStatusCount", TextFieldWithWidgetEditor.class),
+                                "hm2DevMonStatusTrapCause", "hm2DevMonStatusTrapCauseIndex", "hm2DevMonStatusTimeStamp");
+                        createTrapCauseTooltip(container, container.getResultSetList().get(2).getEntryList(), container.getEditor("devSecStatusCount", TextFieldWithWidgetEditor.class),
+                                "hm2DevSecStatusTrapCause", "hm2DevSecStatusTrapCauseIndex", "hm2DevSecStatusTimeStamp");
+
+                        if (applicationData.getAgent().isTrue("\"HMFID_SW_DEVMON_001\" #isFeatureActive")) {
+                            createTrapCauseTooltip(container, container.getResultSetList().get(3).getEntryList(), container.getEditor("sigConStatusCount_1", TextFieldWithWidgetEditor.class),
+                                    "hm2SigConStatusTrapCause", "hm2SigConStatusTrapCauseIndex", "hm2SigConStatusTimeStamp");
+                        }
+
+                        if (applicationData.getAgent().isTrue("\"HM2-DIAGNOSTIC-MIB::hm2SigConCommonEntry\" #count 2 ==")) {
+                            createTrapCauseTooltip(container, container.getResultSetList().get(4).getEntryList(), container.getEditor("sigConStatusCount_2", TextFieldWithWidgetEditor.class),
+                                    "hm2SigConStatusTrapCause", "hm2SigConStatusTrapCauseIndex", "hm2SigConStatusTimeStamp");
+                        }
+
+                        if (applicationData.getAgent().isTrue("\"HMFID_HW_HWE_006\" #isFeatureActive")) {
+
+                            createPowerSupplyTooltip(container.getEditor("powerSupply1_hm2PSState", TextFieldEditor.class), container.getResultSetList().get(5).
+                                    getEntryList(container.getConnection().getSQLProcessor(), "hm2PSUSlotIndex = 1"));
+
+                            if (applicationData.getAgent().isTrue("\"HM2-PWRMGMT-MIB::hm2PSEntry\" #count 2 ==")) {
+                                createPowerSupplyTooltip(container.getEditor("powerSupply2_hm2PSState", TextFieldEditor.class), container.getResultSetList().get(5).
+                                        getEntryList(container.getConnection().getSQLProcessor(), "hm2PSUSlotIndex = 2"));
+                            }
+
+                        }
+
+                    }
+
+                    @Override
+                    public void postUpdate(RecordContainer container) {
+
+                        ((CustomCssFramedPanel) container.getElement("devMonStatusCount").getParentWidget()).apply(container.getResultSet().getFirstEntry().getInt("devMonStatusCount") <= 0);
+                        ((CustomCssFramedPanel) container.getElement("devSecStatusCount").getParentWidget()).apply(container.getResultSet().getFirstEntry().getInt("devSecStatusCount") <= 0);
+
+                        if (applicationData.getAgent().isTrue("\"HMFID_SW_DEVMON_001\" #isFeatureActive")) {
+                            ((CustomCssFramedPanel) container.getElement("sigConStatusCount_1").getParentWidget()).apply(container.getResultSet().getFirstEntry().getInt("sigConStatusCount_1") <= 0);
+                        }
+
+                        if (applicationData.getAgent().isTrue("\"HM2-DIAGNOSTIC-MIB::hm2SigConCommonEntry\" #count 2 ==")) {
+                            Integer a = container.getResultSet().getFirstEntry().getInt("sigConStatusCount_2");
+                            ((CustomCssFramedPanel) container.getElement("sigConStatusCount_2").getParentWidget()).apply(a <= 0);
+                        }
+
+                    }
+
+                    private void createTrapCauseTooltip(final RecordContainer container, List<NavigableResultSet.Entry> entryList, Component editor, final String cause, final String causeIndex, final String timeStamp) {
+
+                        ToolTipConfig tooltip = new ToolTipConfig();
+                        tooltip.setData(entryList);
+                        tooltip.setRenderer((List<NavigableResultSet.Entry> data) -> {
+                            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                            builder.appendHtmlConstant("<div><ol>");
+
+                            for (NavigableResultSet.Entry e : data) {
+                                builder.appendHtmlConstant("<li>");
+                                builder.appendEscaped(DialogUtilities.getTrapCauseText(container.getIfConverter(),
+                                        e.getObject(cause, Integer.class), e.getObject(causeIndex, Integer.class), e.getObject(timeStamp, Long.class)));
+                                builder.appendHtmlConstant("</li>");
+                            }
+                            builder.appendHtmlConstant("</ol></div>");
+
+                            return builder.toSafeHtml();
+                        });
+                        editor.setToolTipConfig(tooltip);
+                    }
+
+                    private void createPowerSupplyTooltip(TextFieldEditor editor, List<NavigableResultSet.Entry> entryList) {
+
+                        ToolTipConfig tooltip = new ToolTipConfig();
+                        tooltip.setData(entryList);
+                        tooltip.setRenderer((List<NavigableResultSet.Entry> data) -> {
+
+                            if (!data.isEmpty()) {
+                                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                                builder.appendEscaped(WebIfResources.INSTANCE.getFormattedDialogString("columnId_hm2PSUSlotSerialNumber",
+                                        data.get(0).getString("hm2PSUSlotSerialNumber")));
+                                builder.appendHtmlConstant("<br>");
+                                builder.appendEscaped(WebIfResources.INSTANCE.getFormattedDialogString("columnId_hm2PSUSlotProductCode",
+                                        data.get(0).getString("hm2PSUSlotProductCode")));
+
+                                return builder.toSafeHtml();
+                            } else {
+                                return SafeHtmlUtils.fromString("-");
+                            }
+
+                        });
+
+                        editor.setToolTipConfig(tooltip);
+
+                    }
+
+                })
+                .setProvideIfConverter(true, false)
+                .build()
+        );
+
+        CustomVerticalLayoutContainer portMainPanel = applicationData.getVerticalLayoutContainerBuilder().build();
+        FlexibleFramedPanel portFrame = new FlexibleFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_system_frame_port_status"), 4);
+        portFrame.setFieldLabelWidth(30);
+        portMainPanel.add(portFrame);
+
+        md.addRemaining(applicationData.getDynamicRecordContainerBuilder()
+                .setContentWidget(portMainPanel)
+                .setElementParentWidget(portFrame)
+                .setEditorFactory(new DynamicRecordContainer.EditorFactory() {
+
+                    @Override
+                    public Editor create() {
+                        return new PortLEDEditor();
+                    }
+                })
+                .setDescriptionHook(new DynamicRecordContainer.DescriptionHook() {
+
+                    @Override
+                    public String getDescription(NavigableResultSet.Entry entry, TranslatableInterface translatableInterface) {
+                        return entry.getObject("ifName", String.class);
+                    }
+                })
+                .setSQLSelectStmt("SELECT ifName,"
+                        + "ifAlias, "
+                        + "ifHighSpeed, "
+                        + "ifMauMediaAvailable, "
+                        + "ifMauType, "
+                        + "ifAdminStatus, "
+                        + "hm2AgentStpMstPortForwardingState, "
+                        + "ifMauAutoNegAdminStatus,"
+                        + "hm2AgentSwitchIpInterfaceRoutingMode,"
+                        + "hm2AgentSwitchIpInterfaceIpAddress "
+                        + "FROM IF_MIB.ifEntry "
+                        + "NATURAL JOIN IF_MIB.ifXEntry "
+                        + "LEFT JOIN HM2_PLATFORM_SWITCHING_MIB.hm2AgentStpMstPortEntry on ifEntry.ifIndex = hm2AgentStpMstPortEntry.ifIndex "
+                        + "LEFT JOIN MAU_MIB.ifMauEntry on ifEntry.ifIndex = ifMauEntry.ifMauIfIndex "
+                        + "LEFT JOIN MAU_MIB.ifMauAutoNegEntry on ifEntry.ifIndex = ifMauAutoNegEntry.ifMauIfIndex "
+                        + "LEFT JOIN HM2_PLATFORM_ROUTING_MIB.hm2AgentSwitchIpInterfaceEntry on ifEntry.ifIndex = hm2AgentSwitchIpInterfaceEntry.hm2AgentSwitchIpInterfaceIfIndex "
+                        + "WHERE ifType = " + IANAifType_MIB.IANAifType.ETHERNET_CSMACD)
+                .build()
+        );
+
+        dp.setAbstractContainer(md);
+
+        return dp;
+    }
+
+    public static DataPanelBuilder createModulesDialog(final ApplicationData applicationData) throws Exception {
+        final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
+
+        TabbedPane tabManager = applicationData.getTabbedPaneBuilder().build();
+
+        final TableContainer EthernetModules = applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("hm2ModuleIndex").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleAdminState").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleProductCode").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleDescription").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleVersion").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleNumOfPorts").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleSerialNum").build(),
+                        TableContainerElementBuilder.create().setId("hm2ModuleStatus").build()
+                )
+                .setSQLSelectStmt("SELECT hm2ModuleIndex, "
+                        + "hm2ModuleAdminState, "
+                        + "hm2ModuleProductCode, "
+                        + "hm2ModuleDescription, "
+                        + "hm2ModuleVersion, "
+                        + "hm2ModuleNumOfPorts, "
+                        + "hm2ModuleSerialNum, "
+                        + "hm2ModuleStatus, "
+                        + "hm2UnitIndex "
+                        + "FROM HM2_DEVMGMT_MIB.hm2ModuleEntry "
+                        + "WHERE hm2UnitIndex = 1")
+                .setCellEnabledModel(new CellConditionEnabledModel().add(CellConditionEnabledModel.falseCondition(), "hm2ModuleStatus", "hm2ModuleDescription"))
+                .build();
+
+        tabManager.addTab(WebIfResources.INSTANCE.getDialogString("global_string_ethernet_module"), EthernetModules);
+
+        /* Create fan tab and table only if the device has support for this */
+        if (applicationData.getAgent().isTrue("\"HMFID_HW_HWE_008\" #isFeatureActive")) {
+
+            final TableContainer FanModules = applicationData.getTableContainerBuilder()
+                    .setAttributeNames(TableContainerElementBuilder.create().setId("hm2FanModuleMgmtId").build(),
+                            TableContainerElementBuilder.create().setId("hm2FanModuleMgmtStatus").build()
+                    )
+                    .setSQLSelectStmt("SELECT hm2FanModuleMgmtId, "
+                            + "hm2FanModuleMgmtStatus "
+                            + "FROM HM2_FAN_MIB.hm2FanModuleMgmtEntry "
+                            + "WHERE hm2UnitIndex = 1")
+                    .build();
+
+            tabManager.addTab(WebIfResources.INSTANCE.getDialogString("global_string_fan_module"), FanModules);
+        }
+
+        CustomMenuItem removeModuleMenu = new CustomMenuItem(WebIfResources.INSTANCE.getDialogString("dialog_moduleManagement_menuItem_removeModules"));
+        removeModuleMenu.setHandler(new CustomSelectionHandler() {
+
+            @Override
+            public void onSelection(SelectionEvent event, DataPanel dp) {
+                final List<SQLGrid.RowData> EthernetselectedRows = EthernetModules.getSelectedRows();
+
+                if (EthernetselectedRows.size() != 1) {
+                    new MessageBox(WebIfResources.INSTANCE.getDialogString("global_string_information"),
+                            WebIfResources.INSTANCE.getDialogString("global_string_select_one_row")).show();
+                } else {
+                    new DataPanel.DataPanelAsyncRunner<Void>(dp, true) {
+                        @Override
+                        protected void callService(final AsyncCallback<Void> cb) {
+                            dp.getConnection().createStatement().execute(
+                                    "UPDATE HM2_DEVMGMT_MIB.hm2ModuleEntry SET " + MibEnumeration.Utils.asExpression(HM2_MODULE_STATUS.REMOVE) + " "
+                                    + "WHERE hm2ModuleIndex = " + EthernetselectedRows.get(0).get("hm2ModuleIndex"),
+                                    Utils.convertAsyncCallbackToDmlCB(cb));
+                        }
+                    }.run(1);
+                }
+            }
+        });
+
+        dp.addToMoreMenu(removeModuleMenu);
+        dp.setAbstractContainer(tabManager);
+        return dp;
+    }
+
+    public static DataPanelBuilder createNetworkDialog(final ApplicationData applicationData) throws Exception {
+
+        final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
+
+        CustomVBoxLayoutContainer mainContainer = applicationData.getVBox().build();
+
+        final VerticalFramedPanel managementInterfaceFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_network_frame_managementInterface"));
+        mainContainer.add(managementInterfaceFrame);
+        final VerticalFramedPanel bootdhcpFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_network_frame_bootdhcp"));
+        mainContainer.add(bootdhcpFrame, "\"HMFID_SW_DHCPC_001\" #isFeatureActive \"HMFID_SW_DHCPC_002\" #isFeatureActive ||");
+        final VerticalFramedPanel hiDiscoveryFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_network_frame_hiDiscovery"));
+        mainContainer.add(hiDiscoveryFrame);
+        final VerticalFramedPanel ipParameterFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_network_frame_ipParameter"));
+        mainContainer.add(ipParameterFrame);
+
+        TabbedPane tabbedPane = applicationData.getTabbedPaneBuilder().build();
+
+        Properties p = new Properties();
+        p.put(SQLDataProvider.PROP_SINGLE_REQUEST, true);
+
+        RecordContainer rc = applicationData.getRecordContainerBuilder()
+                .setContentWidget(mainContainer)
+                .setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetConfigProtocol").setParentWidget(managementInterfaceFrame).setEditor(new RadioButtonEditor()).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetVlanID").setParentWidget(managementInterfaceFrame).build(),
+                        RecordContainerElementBuilder.create().setId("dot1dBaseBridgeAddress").setParentWidget(managementInterfaceFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetHiDiscoveryOperation").setParentWidget(hiDiscoveryFrame).setEditor(DialogUtilities.createOperationIntRadioButtonEditor()).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetHiDiscoveryMode").setParentWidget(hiDiscoveryFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetHiDiscoveryBlinking").setParentWidget(hiDiscoveryFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetHiDiscoveryRelay").setParentWidget(hiDiscoveryFrame).setVisible("\"HMFID_SW_HIDISC_003\" #isFeatureActive").build(),
+                        Utils.createIPv4InetAddressElement("networkIpAddress", "hm2NetLocalIPAddr", "hm2NetLocalIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True),
+                        RecordContainerElementBuilder.create().setId("hm2NetPrefixLength").setEditor(new TextFieldEditor(L2SAsNetmaskConverter.INSTANCE)).setParentWidget(ipParameterFrame).build(),
+                        Utils.createIPv4InetAddressElement("networkGatewayAddress", "hm2NetGatewayIPAddr", "hm2NetGatewayIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True),
+                        RecordContainerElementBuilder.create().setId("hm2NetDHCPClientId").setParentWidget(bootdhcpFrame).setVisible("\"HMFID_SW_DHCPC_001\" #isFeatureActive \"HMFID_SW_DHCPC_002\" #isFeatureActive ||").build()
+                ).setSQLSelectStmt("SELECT hm2NetHiDiscoveryGroup.hm2NetHiDiscoveryOperation, "
+                        + "hm2NetHiDiscoveryGroup.hm2NetHiDiscoveryMode, "
+                        + "hm2NetHiDiscoveryGroup.hm2NetHiDiscoveryBlinking,"
+                        + "hm2NetHiDiscoveryGroup.hm2NetHiDiscoveryRelay, "
+                        + "dot1dBase.dot1dBaseBridgeAddress, "
+                        + "dot1dBase.dot1dBaseNumPorts, "
+                        + "dot1dBase.dot1dBaseType, "
+                        + "hm2NetStaticGroup.hm2NetConfigProtocol, "
+                        + "hm2NetStaticGroup.hm2NetLocalIPAddrType, "
+                        + "hm2NetStaticGroup.hm2NetLocalIPAddr, "
+                        + "hm2NetStaticGroup.hm2NetPrefixLength, "
+                        + "hm2NetStaticGroup.hm2NetGatewayIPAddrType, "
+                        + "hm2NetStaticGroup.hm2NetGatewayIPAddr, "
+                        + "hm2NetStaticGroup.hm2NetVlanID, "
+                        + "hm2NetStaticGroup.hm2NetVlanPriority, "
+                        + "hm2NetStaticGroup.hm2NetIpDscpPriority, "
+                        + "hm2NetStaticGroup.hm2NetDHCPClientId, "
+                        + "hm2NetStaticGroup.hm2NetAction "
+                        + "FROM HM2_NETCONFIG_MIB.hm2NetHiDiscoveryGroup "
+                        + "LEFT JOIN HM2_NETCONFIG_MIB.hm2NetStaticGroup "
+                        + "LEFT JOIN BRIDGE_MIB.dot1dBase")
+                .setProvideIfConverter(true, true)
+                .setGuiHook(new NetworkGuiHook())
+                .setSQLHook(new AbstractContainer.SQLHook<RecordContainer>() {
+
+                    @Override
+                    public List<DMLStmt> preUpdate(RecordContainer container, Action action, List<DMLStmt> dmlStmtList) throws SQLException {
+
+                        for (Iterator<DMLStmt> it = dmlStmtList.iterator(); it.hasNext();) {
+
+                            UpdateStmt updateStmt = (UpdateStmt) it.next();
+
+                            NavigableResultSet.Entry entry = container.getResultSet().getFirstEntry(new RPNCharacteristic(updateStmt.getWhere()));
+
+                            if (updateStmt.isValueUpdated("hm2NetLocalIPAddr") && !updateStmt.isValueUpdated("hm2NetPrefixLength")) {
+                                updateStmt.set(new AbstractStmt.Value("hm2NetPrefixLength", entry.getASN1Value("hm2NetPrefixLength")));
+                            } else if (updateStmt.isValueUpdated("hm2NetPrefixLength") && !updateStmt.isValueUpdated("hm2NetLocalIPAddr")) {
+                                updateStmt.set(new AbstractStmt.Value("hm2NetLocalIPAddr", entry.getASN1Value("hm2NetLocalIPAddr")));
+                                updateStmt.set(new AbstractStmt.Value("hm2NetLocalIPAddrType", entry.getASN1Value("hm2NetLocalIPAddrType")));
+                            }
+                        }
+
+                        return super.preUpdate(container, action, dmlStmtList);
+                    }
+
+                })
+                .setProperties(p)
+                .build();
+
+        tabbedPane.addTab(WebIfResources.INSTANCE.getDialogString("global_string_global"), rc, "\"HMFID_SW_MGMTA_002\" #isFeatureActive");
+
+        mainContainer = applicationData.getVBox().build();
+
+        final VerticalFramedPanel configurationFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("global_string_configuration"));
+        mainContainer.add(configurationFrame);
+        final VerticalFramedPanel informationFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("global_string_information"));
+        mainContainer.add(informationFrame);
+
+        tabbedPane.addTab(WebIfResources.INSTANCE.getDialogString("dialog_network_tab_macConfig_title"), applicationData.getRecordContainerBuilder()
+                .setContentWidget(mainContainer)
+                .setSQLSelectStmt("select hm2NetLocalBurnedInMacAddr,hm2NetLocalAdminMacAddress,hm2NetMacAddressType,dot1dBaseBridgeAddress,hm2NetMgmtPort "
+                        + "from HM2_NETCONFIG_MIB.hm2NetMacGroup "
+                        + "left join BRIDGE_MIB.dot1dBase "
+                        + "left join HM2_NETCONFIG_MIB.hm2NetStaticGroup")
+                .setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetLocalBurnedInMacAddr").setParentWidget(informationFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetLocalAdminMacAddress").setEditor(new TextFieldEditor(S2SAsMacAddressConverter.INSTANCE)).setParentWidget(configurationFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetMacAddressType").setParentWidget(informationFrame).build(),
+                        RecordContainerElementBuilder.create().setId("dot1dBaseBridgeAddress")
+                                .setDescription(WebIfResources.INSTANCE.getDialogString("dialog_network_tab_macConfig_dot1dBaseBridgeAddress_title")).setParentWidget(informationFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetMgmtPort").setEditor(ComboBoxEditor.createEditor(Arrays.asList(new Entry[]{new Entry(0, WebIfResources.INSTANCE.getDialogString("global_string_all"))})))
+                                .setParentWidget(configurationFrame).build())
+                .setProvideIfConverter(true, false)
+                .setGuiHook(new AbstractContainer.GuiHook<RecordContainer>() {
+
+                    @Override
+                    public void preUpdate(RecordContainer container) {
+                        List<Entry<Integer, String>> portList = DialogUtilities.getPortList(container.getIfConverter().getData().getEntryList(new RPNCharacteristic(InterfaceFilter.PHYSICAL_PORT)));
+                        portList.add(0, new Entry(0, "all"));
+                        ((ComboBoxEditor) container.getEditor("hm2NetMgmtPort")).getStore().replaceAll(portList);
+                    }
+                })
+                .build());
+
+        dp.setAbstractContainer(applicationData.getAgent().isTrue("\"HMFID_SW_MGMTA_002\" #isFeatureActive") ? tabbedPane : rc);
+
+        return dp;
+    }
+
+    private static class NetworkGuiHook extends AbstractContainer.GuiHook<RecordContainer> {
+
+        @Override
+        public void preWrite(final RecordContainer container, final Action action, final OperationCallback operationCallback) {
+
+            RecordContainer.RecordContainerUserData userData = (RecordContainer.RecordContainerUserData) action.getUserData();
+
+            if (container.getEditor("networkIpAddress").isModified() || container.getEditor("networkGatewayAddress").isModified()
+                    || container.getEditor("hm2NetPrefixLength").isModified()) {
+
+                MessageBox messageBox = new AlertMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_error"), "");
+                messageBox.addHideHandler(new HideEvent.HideHandler() {
+
+                    @Override
+                    public void onHide(HideEvent event) {
+                        action.setDoAction(false);
+                        operationCallback.onSuccess();
+                    }
+
+                });
+
+                byte[] addressNetwork = (byte[]) ((RecordContainer) container).getEditor("networkIpAddress").getValueMap().get("hm2NetLocalIPAddr");
+                byte[] gatewayAddressNetwork = (byte[]) ((RecordContainer) container).getEditor("networkGatewayAddress").getValueMap().get("hm2NetGatewayIPAddr");
+                long hm2NetPrefixLength = (long) ((RecordContainer) container).getEditor("hm2NetPrefixLength").getConvertedValue();
+
+                try {
+                    InetAddressUtils.NetInfo netInfo = InetAddressUtils.getNetworkInfo(
+                            InetAddress.getByAddress(addressNetwork),
+                            InetAddressUtils.getNetmaskFromSuffix((int) hm2NetPrefixLength));
+                    InetAddress gateway = InetAddress.getByAddress(gatewayAddressNetwork);
+
+                    if (!gateway.getHostAddress().equals("0.0.0.0") && !gateway.getHostAddress().startsWith("localhost") && !netInfo.isInSubnet(gateway)) {
+                        messageBox.setMessage(WebIfResources.INSTANCE.getDialogString("dialog_network_message_gatewaySameNet"));
+                        messageBox.show();
+                    } else {
+                        userData.addDMLStmt(container.getDataPanel().getConnection().getSQLProcessor().computeSingle("UPDATE HM2_NETCONFIG_MIB.hm2NetStaticGroup SET "
+                                + MibEnumeration.Utils.asExpression(HM2_NET_ACTION.ACTIVATE), UpdateStmt.class));
+                        checkManagementVlan(container, action, operationCallback, userData);
+                    }
+
+                } catch (UnknownHostException ex) {
+                    messageBox.setMessage(WebIfResources.INSTANCE.getDialogString("dialog_network_message_invalidHost"));
+                    messageBox.show();
+                }
+            } else {
+                checkManagementVlan(container, action, operationCallback, userData);
+            }
+
+        }
+
+        private void checkManagementVlan(final RecordContainer container, final Action action, final OperationCallback operationCallback, final RecordContainer.RecordContainerUserData userData) {
+
+            final Integer vlanValue = (Integer) userData.getModifiedValues().get("hm2NetVlanID");
+
+            if (container.getEditor("hm2NetVlanID").isModified()) {
+
+                VBoxLayoutContainer mainContainer = new VBoxLayoutContainer();
+
+                List portList = DialogUtilities.getPortList(container.getIfConverter().getData().getEntryList(new RPNCharacteristic(InterfaceFilter.PHYSICAL_AND_LAG_WITHOUT_LAG_MEMBER)));
+                final ComboBoxEditor e = ComboBoxEditor.createEditor("port", portList);
+
+                Label vlanChangedInfo = new Label(WebIfResources.INSTANCE.getDialogString("dialog_network_message_vlanChanged"));
+                mainContainer.add(vlanChangedInfo,
+                        new BoxLayoutContainer.BoxLayoutData(new Margins(LayoutConstants.GENERAL_MARGIN)));
+                mainContainer.add(new CustomFieldLabel(e, WebIfResources.INSTANCE.getDialogString("global_string_port")),
+                        new BoxLayoutContainer.BoxLayoutData(new Margins(LayoutConstants.GENERAL_MARGIN)));
+
+                DialogBuilder.create()
+                        .setHeading(WebIfResources.INSTANCE.getDialogString("global_string_information"))
+                        .setWidget(mainContainer)
+                        .setDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+
+                            @Override
+                            public void onDialogHide(DialogHideEvent event) {
+
+                                if (event.getHideButton().equals(Dialog.PredefinedButton.OK)) {
+
+                                    new DataPanel.DataPanelAsyncRunner<Void>(container.getDataPanel(), false) {
+
+                                        @Override
+                                        protected void callService(final AsyncCallback<Void> cb) {
+
+                                            String query = "SELECT ieee8021QBridgeVlanStaticEgressPorts, "
+                                                    + "ieee8021QBridgeVlanStaticUntaggedPorts "
+                                                    + "FROM IEEE8021_Q_BRIDGE_MIB.ieee8021QBridgeVlanStaticEntry "
+                                                    + "WHERE ieee8021QBridgeVlanStaticVlanIndex = " + vlanValue;
+
+                                            container.getDataPanel().getConnection().createStatement().executeQuery(query, new MibStatement.SelectCB() {
+
+                                                @Override
+                                                public void onOk(List<NavigableResultSet> result) {
+
+                                                    Integer selectedManagementPort = (Integer) e.getConvertedValue();
+                                                    NavigableResultSet.Entry vlanStaticResult = result.get(0).getFirstEntry();
+
+                                                    if (vlanStaticResult == null) {
+
+                                                        AlertMessageBox messageBox = new AlertMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_error"),
+                                                                WebIfResources.INSTANCE.getDialogString("dialog_network_message_vlanNotFound") + vlanValue);
+
+                                                        messageBox.addHideHandler(new HideEvent.HideHandler() {
+
+                                                            @Override
+                                                            public void onHide(HideEvent event) {
+                                                                cb.onSuccess(null);
+                                                                operationCallback.onSuccess();
+                                                            }
+
+                                                        });
+
+                                                        messageBox.show();
+
+                                                    } else {
+                                                        PortList egress = new PortList(vlanStaticResult.getObject("ieee8021QBridgeVlanStaticEgressPorts", byte[].class));
+                                                        egress.add(selectedManagementPort);
+
+                                                        PortList untagged = new PortList(vlanStaticResult.getObject("ieee8021QBridgeVlanStaticUntaggedPorts", byte[].class));
+                                                        untagged.add(selectedManagementPort);
+
+                                                        userData.addDMLStmt(container.getDataPanel().getConnection().getSQLProcessor().computeSingle(
+                                                                "UPDATE Q_BRIDGE_MIB.dot1qPortVlanEntry "
+                                                                + "SET dot1qPvid = " + vlanValue + " "
+                                                                + "WHERE dot1dBasePort = " + selectedManagementPort,
+                                                                UpdateStmt.class));
+
+                                                        userData.addDMLStmt(container.getDataPanel().getConnection().getSQLProcessor().computeSingle(
+                                                                "UPDATE IEEE8021_Q_BRIDGE_MIB.ieee8021QBridgeVlanStaticEntry "
+                                                                + "SET " + SQLUtils.toUpdateString(Arrays.asList(new Pair("ieee8021QBridgeVlanStaticEgressPorts", egress.toByteArray()),
+                                                                        new Pair("ieee8021QBridgeVlanStaticUntaggedPorts", untagged.toByteArray())))
+                                                                + " WHERE ieee8021QBridgeVlanStaticComponentId = 1 and ieee8021QBridgeVlanStaticVlanIndex = " + vlanValue,
+                                                                UpdateStmt.class));
+
+                                                        cb.onSuccess(null);
+                                                        operationCallback.onSuccess();
+                                                    }
+
+                                                }
+
+                                                @Override
+                                                public void onFailure(Exception ex) {
+                                                    cb.onFailure(ex);
+                                                }
+                                            });
+                                        }
+
+                                    }.run(1);
+
+                                } else {
+                                    action.setDoAction(false);
+                                    operationCallback.onSuccess();
+                                }
+                            }
+
+                        })
+                        .build()
+                        .show();
+
+            } else {
+                operationCallback.onSuccess();
+            }
+        }
+
+        @Override
+        public void postUpdate(final RecordContainer container) {
+
+            RadioButtonEditor netConfigProtocolEditor = (RadioButtonEditor) container.getEditor("hm2NetConfigProtocol");
+            // onLoad display
+            setRecordsEnabledOrNot(container, netConfigProtocolEditor.getConvertedValue().equals(HM2_NET_CONFIG_PROTOCOL.NONE.getValue()));
+            // onValueChange display
+            netConfigProtocolEditor.addValueChangeHandler(new ValueChangeHandler<HasValue<Boolean>>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<HasValue<Boolean>> event) {
+                    ToggleGroup group = (ToggleGroup) event.getSource();
+                    Radio radio = (Radio) group.getValue();
+                    boolean enabled = radio.getData(RadioButtonEditor.ENUM_ASN1_VALUE).equals(HM2_NET_CONFIG_PROTOCOL.NONE.getValue());
+                    setRecordsEnabledOrNot(container, enabled);
+                }
+            });
+        }
+
+        private void setRecordsEnabledOrNot(RecordContainer container, boolean enabled) {
+            container.getEditor("networkIpAddress").setEnabled(enabled);
+            container.getEditor("hm2NetPrefixLength").setEnabled(enabled);
+            container.getEditor("networkGatewayAddress").setEnabled(enabled);
+        }
+
+    }
+
+    public static DataPanelBuilder createOutOfBandDialog(final ApplicationData applicationData) throws Exception {
+        final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
+
+        CustomVBoxLayoutContainer mainContainer = applicationData.getVBox().build();
+
+        final VerticalFramedPanel operationFrame = OperationFramedPanel.create();
+        mainContainer.add(operationFrame, "\"HMFID_SW_HWE_009_02\" #isFeatureActive !");
+        final VerticalFramedPanel managementInterfaceFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_managementInterface"));
+        mainContainer.add(managementInterfaceFrame, "\"HMFID_SW_HWE_009_02\" #isFeatureActive !");
+        final VerticalFramedPanel ipParameterFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_ipParameter"));
+        mainContainer.add(ipParameterFrame);
+
+        SortedMap<Object, String> mgmtProtocol = new TreeMap<>();
+        mgmtProtocol.put(1, WebIfResources.INSTANCE.getDialogString("global_string_local"));
+        mgmtProtocol.put(3, WebIfResources.INSTANCE.getDialogString("global_string_dhcp"));
+
+        RecordContainer rc = applicationData.getRecordContainerBuilder().setContentWidget(mainContainer).
+                setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetOobMgmtAdminState").setDescription("").setEditor(DialogUtilities.createOperationIntRadioButtonEditor()).setParentWidget(operationFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobMgmtProtocol").setEditor(new RadioButtonEditor(mgmtProtocol)).setParentWidget(managementInterfaceFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobMgmtMacAddress").setParentWidget(managementInterfaceFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobMgmtOperState").setParentWidget(managementInterfaceFrame).build(),
+                        Utils.createIPv4InetAddressElement("oobIpAddress", "hm2NetOobMgmtIPAddr", "hm2NetOobMgmtIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobMgmtPrefixLength").setEditor(new TextFieldEditor(L2SAsNetmaskConverter.INSTANCE)).setParentWidget(ipParameterFrame).build(),
+                        Utils.createIPv4InetAddressElement("oobGatewayAddress", "hm2NetOobMgmtGatewayIPAddr", "hm2NetOobMgmtGatewayIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True, "\"HMFID_SW_HWE_009_02\" #isFeatureActive !"))
+                .setSQLSelectStmt("SELECT hm2NetOobMgmtAdminState, "
+                        + "hm2NetOobMgmtProtocol,"
+                        + "hm2NetOobMgmtMacAddress, "
+                        + "hm2NetOobMgmtOperState, "
+                        + "hm2NetOobMgmtIPAddrType, "
+                        + "hm2NetOobMgmtIPAddr, "
+                        + "hm2NetOobMgmtPrefixLength, "
+                        + "hm2NetOobMgmtGatewayIPAddrType, "
+                        + "hm2NetOobMgmtGatewayIPAddr, "
+                        + "hm2NetOobMgmtAction "
+                        + "FROM HM2_NETCONFIG_MIB.hm2NetOobMgmtGroup")
+                .setGuiHook(new OutOfBandGuiHook())
+                .build();
+
+        dp.setAbstractContainer(rc);
+        return dp;
+    }
+
+
+
+    public static DataPanelBuilder createusbOutOfBandManagement(final ApplicationData applicationData) throws Exception {
+               final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
+               CustomVBoxLayoutContainer mainContainer = applicationData.getVBox().build();
+        final VerticalFramedPanel operationFrame = OperationFramedPanel.create();
+        mainContainer.add(operationFrame, "\"HMFID_SW_HWE_009\" #isFeatureActive !");
+        final VerticalFramedPanel managementInterfaceFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_managementInterface"));
+        mainContainer.add(managementInterfaceFrame, "\"HMFID_SW_HWE_009\" #isFeatureActive !");
+        final VerticalFramedPanel ipParameterFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_ipParameter"));
+        mainContainer.add(ipParameterFrame);
+        SortedMap<Object, String> mgmtProtocol = new TreeMap<>();
+        mgmtProtocol.put(1, WebIfResources.INSTANCE.getDialogString("global_string_local"));
+        mgmtProtocol.put(3, WebIfResources.INSTANCE.getDialogString("global_string_dhcp"));
+        RecordContainer rc = applicationData.getRecordContainerBuilder().setContentWidget(mainContainer).
+                setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtAdminState").setDescription("").setEditor(DialogUtilities.createOperationIntRadioButtonEditor()).
+                        setParentWidget(operationFrame).build(),
+
+                       RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtDeviceMacAddress").
+                               setParentWidget(managementInterfaceFrame).build(),
+
+                                   //RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtAdminState").setParentWidget(managementInterfaceFrame).build(),
+
+                       Utils.createIPv4InetAddressElement("oobIpAddress", "hm2NetOobUsbMgmtIPAddr", "hm2NetOobUsbMgmtIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtPrefixLength").setEditor(new TextFieldEditor(L2SAsNetmaskConverter.INSTANCE)).
+                                setParentWidget(ipParameterFrame).build()
+                                )
+                .setSQLSelectStmt("SELECT hm2NetOobUsbMgmtAdminState, "
+                       + "hm2NetOobUsbMgmtDeviceMacAddress, "
+                        + "hm2NetOobUsbMgmtIPAddrType, "
+                        + "hm2NetOobUsbMgmtIPAddr, "
+                        + "hm2NetOobUsbMgmtPrefixLength "
+                       // + "hm2NetOobMgmtGatewayIPAddrType, "
+                      // + "hm2NetOobMgmtGatewayIPAddr, "
+                      //  + "hm2NetOobMgmtAction "
+                        + "FROM HM2_NETCONFIG_MIB.hm2NetOobUsbMgmtGroup")
+                .setGuiHook(new OutOfBandGuiHook())
+                .build();
+
+        dp.setAbstractContainer(rc);
+       return dp;
+
+    }
+
+    private static class OutOfBandGuiHook extends AbstractContainer.GuiHook<RecordContainer> {
+
+        @Override
+        public void preWrite(final RecordContainer container, final Action action, final OperationCallback operationCallback) {
+
+            RecordContainer.RecordContainerUserData userData = (RecordContainer.RecordContainerUserData) action.getUserData();
+
+            if (container.getDataPanel().getHmAgent().isTrue("\"HMFID_SW_HWE_009_02\" #isFeatureActive !") && (container.getEditor("oobIpAddress").isModified() || container.getEditor("oobGatewayAddress").isModified()
+                    || container.getEditor("hm2NetOobMgmtPrefixLength").isModified())) {
+
+                MessageBox messageBox = new AlertMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_error"), "");
+                messageBox.addHideHandler(new HideEvent.HideHandler() {
+
+                    @Override
+                    public void onHide(HideEvent event) {
+                        action.setDoAction(false);
+                        operationCallback.onSuccess();
+                    }
+
+                });
+
+                byte[] addressNetwork = (byte[]) ((RecordContainer) container).getEditor("oobIpAddress").getValueMap().get("hm2NetOobMgmtIPAddr");
+                byte[] gatewayAddressNetwork = (byte[]) ((RecordContainer) container).getEditor("oobGatewayAddress").getValueMap().get("hm2NetOobMgmtGatewayIPAddr");
+                long hm2NetOobMgmtPrefixLength = (long) ((RecordContainer) container).getEditor("hm2NetOobMgmtPrefixLength").getConvertedValue();
+
+                try {
+                    InetAddressUtils.NetInfo netInfo = InetAddressUtils.getNetworkInfo(
+                            InetAddress.getByAddress(addressNetwork),
+                            InetAddressUtils.getNetmaskFromSuffix((int) hm2NetOobMgmtPrefixLength));
+                    InetAddress gateway = InetAddress.getByAddress(gatewayAddressNetwork);
+
+                    if (!gateway.getHostAddress().equals("0.0.0.0") && !gateway.getHostAddress().startsWith("localhost") && !netInfo.isInSubnet(gateway)) {
+                        messageBox.setMessage(WebIfResources.INSTANCE.getDialogString("dialog_network_message_gatewaySameNet"));
+                        messageBox.show();
+                    } else {
+                        userData.addDMLStmt(container.getDataPanel().getConnection().getSQLProcessor().computeSingle("UPDATE HM2_NETCONFIG_MIB.hm2NetOobMgmtGroup SET "
+                                + MibEnumeration.Utils.asExpression(HM2_NET_OOB_ACTION.ACTIVATE), UpdateStmt.class));
+                        operationCallback.onSuccess();
+                    }
+                } catch (UnknownHostException ex) {
+                    messageBox.setMessage(WebIfResources.INSTANCE.getDialogString("dialog_network_message_invalidHost"));
+                    messageBox.show();
+                }
+            } else {
+                operationCallback.onSuccess();
+            }
+        }
+
+        @Override
+        public void postUpdate(final RecordContainer container) {
+
+            RadioButtonEditor netConfigProtocolEditor = (RadioButtonEditor) container.getEditor("hm2NetOobMgmtProtocol");
+
+            setRecordsEnabledOrNot(container, netConfigProtocolEditor.getConvertedValue().equals(HM2_NET_OOB_CONFIG_PROTOCOL.NONE.getValue()));
+
+            netConfigProtocolEditor.addValueChangeHandler(new ValueChangeHandler<HasValue<Boolean>>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<HasValue<Boolean>> event) {
+                    ToggleGroup group = (ToggleGroup) event.getSource();
+                    Radio radio = (Radio) group.getValue();
+                    boolean enabled = radio.getData(RadioButtonEditor.ENUM_ASN1_VALUE).equals(HM2_NET_OOB_CONFIG_PROTOCOL.NONE.getValue());
+                    setRecordsEnabledOrNot(container, enabled);
+                }
+            });
+        }
+
+        private void setRecordsEnabledOrNot(RecordContainer container, boolean enabled) {
+            container.getEditor("oobIpAddress").setEnabled(enabled);
+            container.getEditor("hm2NetOobMgmtPrefixLength").setEnabled(enabled);
+
+            if (container.getDataPanel().getHmAgent().isTrue("\"HMFID_SW_HWE_009_02\" #isFeatureActive !")) {
+                container.getEditor("oobGatewayAddress").setEnabled(enabled);
+            }
+
+        }
+
+    }
+
+    public static DataPanelBuilder createSoftwareDialog(ApplicationData applicationData) throws Exception {
+
+        final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_OPERATION_SET);
+        VerticalMultiDataManager verticalManager = new VerticalMultiDataManager();
+
+        CustomVBoxLayoutContainer c = applicationData.getVBox().build();
+
+        final VerticalFramedPanel versionFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_software_frame_version"));
+        c.add(versionFrame);
+
+        verticalManager.add(applicationData.getRecordContainerBuilder()
+                .setContentWidget(c)
+                .setAttributeNames(RecordContainerElementBuilder.create().setId("hm2DevMgmtSwVersionFlashBootable").setParentWidget(versionFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2DevMgmtSwVersionRam").setParentWidget(versionFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2DevMgmtSwVersionFlashBackup").setParentWidget(versionFrame).setVisible("\"HMFID_SW_FIRMWARE_005\" #isFeatureActive").build(),
+                        RecordContainerElementBuilder.create().setId("hm2DevMgmtSwVersBootcode").setParentWidget(versionFrame).build()
+                )
+                .setSQLSelectStmt("SELECT ram.hm2DevMgmtSwVersion AS hm2DevMgmtSwVersionRam, "
+                        + "flashBootable.hm2DevMgmtSwVersion AS hm2DevMgmtSwVersionFlashBootable, "
+                        + "flashBackup.hm2DevMgmtSwVersion AS hm2DevMgmtSwVersionFlashBackup, "
+                        + "hm2DeviceMgmtSoftwareVersionGroup.hm2DevMgmtSwVersBootcode "
+                        + "FROM HM2_DEVMGMT_MIB.hm2DevMgmtSwVersEntry AS ram "
+                        + "LEFT JOIN HM2_DEVMGMT_MIB.hm2DevMgmtSwVersEntry AS flashBootable ON flashBootable.hm2DevMgmtSwFileLocation = 2 AND flashBootable.hm2DevMgmtSwFileType = 1 AND flashBootable.hm2DevMgmtSwFileIdx = 1 "
+                        + "LEFT JOIN HM2_DEVMGMT_MIB.hm2DevMgmtSwVersEntry AS flashBackup ON flashBackup.hm2DevMgmtSwFileLocation = 2 AND flashBackup.hm2DevMgmtSwFileType = 1 AND flashBackup.hm2DevMgmtSwFileIdx = 2 "
+                        + "LEFT JOIN HM2_DEVMGMT_MIB.hm2DeviceMgmtSoftwareVersionGroup "
+                        + "WHERE ram.hm2DevMgmtSwFileLocation = 1 AND ram.hm2DevMgmtSwFileType = 1 AND ram.hm2DevMgmtSwFileIdx = 1")
+                .setAddWidgetHook(new RecordContainer.AddWidgetHook() {
+
+                    @Override
+                    public void add(String columnId, HBoxLayoutContainer field, HasWidgets parent, DataPanel dp) {
+                        if (columnId.equals("hm2DevMgmtSwVersionFlashBackup")) {
+                            final TextButton restoreButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_software_button_restore"));
+                            restoreButton.addSelectHandler(new SelectEvent.SelectHandler() {
+                                @Override
+                                public void onSelect(SelectEvent event) {
+                                    new DpFileManagementTask(dp,
+                                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.SWAP,
+                                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.FIRMWARE,
+                                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.SYSTEM,
+                                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.SYSTEM).run(1);
+                                }
+                            });
+
+                            field.add(restoreButton);
+
+                        }
+
+                        parent.add((Widget) field);
+
+                    }
+                })
+                .build()
+        );
+
+        if (applicationData.getAgent().isTrue("\"HM2-FILEMGMT-MIB::hm2FMActionActivate\" \"writeView\" #hasVacmAccess")) {
+            final VerticalFramedPanel updateFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_software_frame_softwareUpdate"));
+            c.add(updateFrame);
+            updateFrame.add(applicationData.getFileUploadWidgetBuilder()
+                .setFileManagementTask(new DpFileManagementTask(dp.preBuild(),
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.COPY,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.FIRMWARE,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.SERVER,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.SYSTEM))
+                .setURLBuilder(URLBuilder.create()
+                        .setAbsoluteURL(applicationData.getProtocol(), applicationData.getHost())
+                        .setMode(URLBuilder.Mode.UPLOAD)
+                        .setFileType(URLBuilder.FileType.FIRMWARE)
+                        .setLocation(URLBuilder.Location.NMV))
+                .setConnection(dp.getConnection())
+                .setAcceptedFiles(".bin")
+                .build());
+        }
+
+        TabbedPane tabbedPane = applicationData.getTabbedPaneBuilder().build();
+
+        TableContainer fileSystem = applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("firmware.hm2DevMgmtSwFileLocation").setDescription(WebIfResources.INSTANCE.getColumnIdTranslation("fileLocation")).build(),
+                        TableContainerElementBuilder.create().setId("firmware.hm2DevMgmtSwFileIdx").setDescription(WebIfResources.INSTANCE.getColumnIdTranslation("fileIdx")).build(),
+                        TableContainerElementBuilder.create().setId("firmware.hm2DevMgmtSwFileName").setDescription(WebIfResources.INSTANCE.getColumnIdTranslation("fileName")).build(),
+                        TableContainerElementBuilder.create().setId("firmware.hm2DevMgmtSwVersion").setDescription(WebIfResources.INSTANCE.getColumnIdTranslation("firmwareSwVersion")).build()
+                )
+                .setSQLSelectStmt("SELECT firmware.hm2DevMgmtSwFileLocation, "
+                        + "firmware.hm2DevMgmtSwFileType, "
+                        + "firmware.hm2DevMgmtSwFileIdx, "
+                        + "firmware.hm2DevMgmtSwFileName, "
+                        + "firmware.hm2DevMgmtSwVersion "
+                        + "FROM HM2_DEVMGMT_MIB.hm2DevMgmtSwVersEntry AS firmware "
+                        + "WHERE firmware.hm2DevMgmtSwFileType = 1")
+                .build();
+
+        tabbedPane.addTab(WebIfResources.INSTANCE.getDialogString("global_filesystem"), fileSystem);
+
+        if (applicationData.getAgent().isTrue("\"HMFID_SW_EXTNVM\" #isFeatureActive")) {
+
+            Menu softwareUpdateMenu = new Menu();
+            MenuItem softwareUpdate = new MenuItem(WebIfResources.INSTANCE.getDialogString("global_string_update"));
+            softwareUpdateMenu.add(softwareUpdate);
+            softwareUpdate.addSelectionHandler((SelectionEvent<Item> event) -> {
+
+                if (fileSystem.getSelectedRows().isEmpty()) {
+                    new CustomInformationMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_information"),
+                            WebIfResources.INSTANCE.getDialogString("global_string_no_rows_selected")).show();
+                } else if (fileSystem.getSelectedRows().size() < 1) {
+                    new CustomInformationMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_information"),
+                            WebIfResources.INSTANCE.getDialogString("global_string_select_one_row")).show();
+                } else {
+
+                    new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                        @Override
+                        protected void callService(AsyncCallback<Void> cb) {
+
+                            dp.getConnection().createStatement().executeQuery("select hm2ExtNvmChooseActive from HM2_DEVMGMT_MIB.hm2ExtNvmGeneralGroup",
+                                    new MibStatement.SelectCB() {
+                                @Override
+                                public void onOk(List<NavigableResultSet> result) {
+                                    cb.onSuccess(null);
+
+                                    HM2_DEVICE_EXT_NVM_TYPE nvmType
+                                            = HM2_DEVICE_EXT_NVM_TYPE.fromValue(result.get(0).getFirstEntry().getInt("hm2ExtNvmChooseActive"));
+
+                                    HM2_DEV_MGMT_SW_FILE_LOCATION location = HM2_DEV_MGMT_SW_FILE_LOCATION.fromValue(
+                                            fileSystem.getSelectedRows().get(0).getInt("firmware.hm2DevMgmtSwFileLocation"));
+
+                                    if ((location.equals(HM2_DEV_MGMT_SW_FILE_LOCATION.SD_CARD) && nvmType.equals(HM2_DEVICE_EXT_NVM_TYPE.SD))
+                                            || (location.equals(HM2_DEV_MGMT_SW_FILE_LOCATION.USB) && nvmType.equals(HM2_DEVICE_EXT_NVM_TYPE.USB))) {
+
+                                        new DpFileManagementTask(dp.preBuild(),
+                                                fileSystem.getSelectedRows().get(0).getString("firmware.hm2DevMgmtSwFileName"), "",
+                                                HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.COPY,
+                                                HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.FIRMWARE,
+                                                HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.ENVM,
+                                                HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.SYSTEM).run(1);
+
+                                    } else {
+                                        try {
+                                            new CustomInformationMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_information"),
+                                                    WebIfResources.INSTANCE.getFormattedDialogString("dialog_software_envmUpdate_message",
+                                                            WebIfResources.INSTANCE.getMibEnumTranslation("hm2ExtNvmChooseActive",
+                                                                    result.get(0).getMetaData().getSyntax("hm2ExtNvmChooseActive"), nvmType.getValue()))).show();
+                                        } catch (SQLException ex) {
+                                            cb.onFailure(ex);
+                                        }
+                                    }
+
+                                }
+
+                                @Override
+                                public void onFailure(Exception ex) {
+                                    cb.onFailure(ex);
+                                }
+                            });
+
+                        }
+
+                    }.run(1);
+
+                }
+            });
+
+            fileSystem.getGrid().setContextMenu(softwareUpdateMenu);
+        }
+
+        tabbedPane.addTab(WebIfResources.INSTANCE.getDialogString("global_license"), applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("hm2LMLicenseId").build(),
+                        TableContainerElementBuilder.create().setId("hm2LMLicenseDescription").build(),
+                        TableContainerElementBuilder.create().setId("hm2LMLicenseOperStatus").build(),
+                        TableContainerElementBuilder.create().setId("hm2LMLicenseSwLvlCap").setRenderer(new TextCell()).setConverter(new Ba2SAsBITSConverter(
+                                new String[]{"none", "2e", "2s", "2a", "3s", "3a"}, "-")).build()
+                )
+                .setSQLSelectStmt("SELECT * FROM HM2_LICENSE_MGMT_MIB.hm2LMLicenseEntry").build(), "\"HMFID_SW_LIC_002\" #isFeatureActive");
+
+        verticalManager.addRemaining(tabbedPane);
+
+        dp.setAbstractContainer(verticalManager);
+
+        return dp;
+    }
+
+    public static DataPanelBuilder createConfigurationDialog(ApplicationData applicationData) throws Exception {
+        return ConfigurationDialogs.createLoadSaveDialog(applicationData);
+    }
+
+    public static DataPanelBuilder createExternalMemoryDialog(ApplicationData applicationData) throws Exception {
+        DataPanelBuilder dp = applicationData.getDataPanelBuilder();
+
+        VerticalMultiDataManager md = new VerticalMultiDataManager();
+
+        if (applicationData.getAgent().isTrue("\"HMFID_SW_EXTNVM_003_01\" #isFeatureActive")) {
+
+            CustomHBoxLayoutContainer mainContainer = applicationData.getHBox().build();
+
+            VerticalFramedPanel configurationFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("global_string_configuration"));
+            mainContainer.add(configurationFrame);
+            VerticalFramedPanel informationFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("global_string_information"));
+            mainContainer.add(informationFrame);
+
+            md.add(applicationData.getRecordContainerBuilder()
+                    .setContentWidget(mainContainer)
+                    .setAttributeNames(RecordContainerElementBuilder.create().setId("hm2ExtNvmAdminMode").setParentWidget(configurationFrame).build(),
+                            RecordContainerElementBuilder.create().setId("hm2ExtNvmOperMode").setParentWidget(informationFrame).build())
+                    .setSQLSelectStmt("SELECT * FROM HM2_DEVMGMT_MIB.hm2ExtNvmGeneralGroup")
+                    .build());
+        }
+
+        md.addRemaining(applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("hm2ExtNvmTableIndex").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmStatus").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmWritable").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmAutomaticSoftwareLoad").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmAutomaticSshKeyLoad").setVisible("\"HMFID_SW_SSH_002_01\" #isFeatureActive").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmConfigLoadPriority").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmConfigSave").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmManufacturerId").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmHWRevision").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmVersion").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmProductName").build(),
+                        TableContainerElementBuilder.create().setId("hm2ExtNvmSerialNum").build())
+                .setSQLSelectStmt("SELECT * FROM HM2_DEVMGMT_MIB.hm2ExtNvmEntry")
+                .build());
+
+        dp.setAbstractContainer(md);
+        return dp;
+    }
+
+    public static DataPanelBuilder createPortDialog(ApplicationData applicationData) throws Exception {
+
+        DataPanelBuilder dp = applicationData.getDataPanelBuilder();
+
+        TabbedPane tabs = applicationData.getTabbedPaneBuilder().build();
+
+        final CellConditionEnabledModel enabledModel = new CellConditionEnabledModel();
+        enabledModel.add(CellConditionEnabledModel.not(CellConditionEnabledModel.has("hm2IfaceAutoPowerDown", "unsupported")), "hm2IfaceAutoPowerDown");
+        enabledModel.add(new CellConditionEnabledModel.Condition() {
+
+            @Override
+            public boolean evaluate(Grid<SQLGrid.RowData> grid, int rowIndex) {
+                return grid.getStore().get(rowIndex).getBoolean("ifMauAutoNegSupported");
+            }
+
+        }, "ifMauAutoNegAdminStatus");
+        enabledModel.add(CellConditionEnabledModel.not(CellConditionEnabledModel.has("hm2IfaceCableCrossing", "unsupported")), "hm2IfaceCableCrossing");
+
+        TableContainer portTable = applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("ifIndex").build(),
+                        TableContainerElementBuilder.create().setId("ifAlias").build(),
+                        TableContainerElementBuilder.create().setId("ifAdminStatus").setConverter(I2BAsEnabledStatusConverter.INSTANCE).setRenderer(new CheckBoxCell()).setEditor(new TableCheckBoxEditor()).build(),
+                        TableContainerElementBuilder.create().setId("hm2IfaceOperAdminStatus").setConverter(I2BAsEnabledStatusConverter.INSTANCE).setRenderer(new CheckBoxCell()).setEditor(new TableCheckBoxEditor()).build(),
+                        TableContainerElementBuilder.create().setId("hm2IfacePowerState").build(),
+                        TableContainerElementBuilder.create().setId("hm2IfaceAutoPowerDown").build(),
+                        TableContainerElementBuilder.create().setId("ifMauAutoNegAdminStatus").setConverter(I2BAsEnabledStatusConverter.INSTANCE).setRenderer(new CheckBoxCell()).setEditor(new TableCheckBoxEditor()).build(),
+                        TableContainerElementBuilder.create().setId("ifMauDefaultType").setRenderer(new TextCell()).setConverter(S2SAsMauTypeConverter.INSTANCE).build(),
+                        TableContainerElementBuilder.create().setId("ifMauType").setRenderer(new TextCell()).setColumnMapper(new MauTypeColumnMapper()).setConverter(S2SAsMauTypeConverter.INSTANCE).build(),
+                        TableContainerElementBuilder.create().setId("hm2IfaceCableCrossing").build(),
+                        TableContainerElementBuilder.create().setId("hm2TrafficMgmtIfFlowControl").build(),
+                        TableContainerElementBuilder.create().setId("ifLinkUpDownTrapEnable").setConverter(I2BAsEnabledStatusConverter.INSTANCE).setRenderer(new CheckBoxCell()).setEditor(new TableCheckBoxEditor()).build(),
+                        TableContainerElementBuilder.create().setId("hm2AgentPortMaxFrameSize").setVisible("\"HMFID_SW_TRAFFIC_007\" #isFeatureActive").build(),
+                        TableContainerElementBuilder.create().setId("hm2LedPortSignaling").setVisible("\"HMFID_SW_LED_002\" #isFeatureActive").build(),
+                        TableContainerElementBuilder.create().setId("hm2AgentPortSfpLinkLossAlert").setVisible("\"HMFID_SW_PHY_013\" #isFeatureActive").build())
+                .setSQLSelectStmt("SELECT ifType, "
+                        + "ifEntry.ifIndex, "
+                        + "ifXEntry.ifIndex, "
+                        + "hm2TrafficMgmtIfEntry.ifIndex,"
+                        + "ifAlias, "
+                        + "hm2IfaceEntry.hm2IfacePhysIndex, "
+                        + "hm2LedPortEntry.hm2IfacePhysIndex, "
+                        + "hm2AgentPortConfigEntry.hm2AgentPortDot1dBasePort, "
+                        + "ifAdminStatus, "
+                        + "hm2IfaceOperAdminStatus, "
+                        + "hm2IfacePowerState, "
+                        + "hm2IfaceAutoPowerDown, "
+                        + "ifMauAutoNegAdminStatus, "
+                        + "ifMauDefaultType, "
+                        + "ifMauMediaAvailable, "
+                        + "ifMauType, "
+                        + "ifMauTypeListBits, "
+                        + "ifMauAutoNegEntry.ifMauIndex, "
+                        + "ifMauAutoNegEntry.ifMauIfIndex, "
+                        + "ifMauEntry.ifMauIfIndex, "
+                        + "ifMauEntry.ifMauIndex, "
+                        + "hm2IfacePortCapabilityBits, "
+                        + "hm2IfaceCableCrossing, "
+                        + "hm2TrafficMgmtIfFlowControl, "
+                        + "hm2AgentPortMaxFrameSize, "
+                        + "hm2LedPortSignaling,"
+                        + "ifXEntry.ifLinkUpDownTrapEnable,"
+                        + "hm2AgentPortSfpLinkLossAlert,"
+                        + "ifMauAutoNegSupported "
+                        + "FROM IF_MIB.ifEntry "
+                        + "LEFT JOIN HM2_DEVMGMT_MIB.hm2IfaceEntry ON ifEntry.ifIndex = hm2IfaceEntry.hm2IfacePhysIndex "
+                        + "LEFT JOIN MAU_MIB.ifMauAutoNegEntry ON ifEntry.ifIndex = ifMauAutoNegEntry.ifMauIfIndex "
+                        + "LEFT JOIN MAU_MIB.ifMauEntry ON ifEntry.ifIndex = ifMauEntry.ifMauIfIndex "
+                        + "LEFT JOIN HM2_TRAFFICMGMT_MIB.hm2TrafficMgmtIfEntry ON ifEntry.ifIndex = hm2TrafficMgmtIfEntry.ifIndex "
+                        + "LEFT JOIN HM2_PLATFORM_SWITCHING_MIB.hm2AgentPortConfigEntry ON ifEntry.ifIndex = hm2AgentPortConfigEntry.hm2AgentPortIfIndex "
+                        + "LEFT JOIN HM2_DIAGNOSTIC_MIB.hm2LedPortEntry ON ifEntry.ifIndex = hm2LedPortEntry.hm2IfacePhysIndex "
+                        + "NATURAL JOIN IF_MIB.ifXEntry "
+                        + "WHERE ifType = " + IANAifType_MIB.IANAifType.ETHERNET_CSMACD)
+                .setCellEnabledModel(enabledModel)
+                .setProvideIfConverter(true, false)
+                .setEditorHook(new MauTypeEditorHook())
+                .build();
+
+        tabs.addTab(WebIfResources.INSTANCE.getDialogString("dialog_port_tab_configuration"), portTable);
+
+        TableContainer statisticsTable = applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("ifIndex").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCInOctets").build(),
+                        TableContainerElementBuilder.create().setId("ifHCInUcastPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCInMulticastPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCInBroadcastPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCOutAllPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCOutOctets").build(),
+                        TableContainerElementBuilder.create().setId("ifHCOutUcastPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCOutMulticastPkts").build(),
+                        TableContainerElementBuilder.create().setId("ifHCOutBroadcastPkts").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsFragments").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsCRCAlignErrors").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsCollisions").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts64Octets").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts65to127Octets").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts128to255Octets").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts256to511Octets").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts512to1023Octets").build(),
+                        TableContainerElementBuilder.create().setId("etherStatsPkts1024to1518Octets").build(),
+                        TableContainerElementBuilder.create().setId("ifInDiscards").build(),
+                        TableContainerElementBuilder.create().setId("ifOutDiscards").build())
+                .setSQLSelectStmt("SELECT ifEntry.ifIndex, "
+                        + "ifXEntry.ifIndex, "
+                        + "etherStatsEntry.etherStatsPkts, "
+                        + "ifXEntry.ifHCInOctets, "
+                        + "ifXEntry.ifHCInUcastPkts, "
+                        + "ifXEntry.ifHCInMulticastPkts, "
+                        + "ifHCOutUcastPkts + "
+                        + "ifHCOutMulticastPkts + "
+                        + "ifHCOutBroadcastPkts as ifHCOutAllPkts, "
+                        + "ifXEntry.ifHCInBroadcastPkts, "
+                        + "ifXEntry.ifHCOutOctets, "
+                        + "ifXEntry.ifHCOutUcastPkts, "
+                        + "ifXEntry.ifHCOutMulticastPkts, "
+                        + "ifXEntry.ifHCOutBroadcastPkts, "
+                        + "etherStatsEntry.etherStatsFragments, "
+                        + "etherStatsEntry.etherStatsCRCAlignErrors, "
+                        + "etherStatsEntry.etherStatsCollisions, "
+                        + "etherStatsEntry.etherStatsPkts64Octets, "
+                        + "etherStatsEntry.etherStatsPkts65to127Octets, "
+                        + "etherStatsEntry.etherStatsPkts128to255Octets, "
+                        + "etherStatsEntry.etherStatsPkts256to511Octets, "
+                        + "etherStatsEntry.etherStatsPkts512to1023Octets, "
+                        + "etherStatsEntry.etherStatsPkts1024to1518Octets, "
+                        + "etherStatsEntry.etherStatsIndex, "
+                        + "ifEntry.ifInDiscards, "
+                        + "ifEntry.ifOutDiscards "
+                        + "FROM IF_MIB.ifEntry "
+                        + "LEFT JOIN RMON_MIB.etherStatsEntry on ifEntry.ifIndex = etherStatsEntry.etherStatsIndex "
+                        + "NATURAL JOIN IF_MIB.ifXEntry "
+                        + "WHERE ifType = " + IANAifType_MIB.IANAifType.ETHERNET_CSMACD + " "
+                        + "OR ifType = " + IANAifType_MIB.IANAifType.IEEE8023_ADLAG)
+                .setProvideIfConverter(true, false)
+                .build();
+
+        tabs.addTab(WebIfResources.INSTANCE.getDialogString("dialog_port_tab_statistics"), statisticsTable);
+
+        tabs.addTab(WebIfResources.INSTANCE.getDialogString("dialog_port_tab_utilization_title"), applicationData.getTableContainerBuilder()
+                .setAttributeNames(TableContainerElementBuilder.create().setId("ifIndex").build(),
+                        TableContainerElementBuilder.create().setId("hm2DiagIfaceUtilization")
+                                .setEditor(new TableTextFieldEditor()).setRenderer(new TextCell()).setConverter(new I2SAsDecimalConverter(100, 2, 2)).build(),
+                        TableContainerElementBuilder.create().setId("hm2DiagIfaceUtilizationAlarmLowerThreshold")
+                                .setEditor(new TableTextFieldEditor()).setRenderer(new TextCell()).setConverter(new I2SAsDecimalConverter(100, 2, 2)).build(),
+                        TableContainerElementBuilder.create().setId("hm2DiagIfaceUtilizationAlarmUpperThreshold")
+                                .setEditor(new TableTextFieldEditor()).setRenderer(new TextCell()).setConverter(new I2SAsDecimalConverter(100, 2, 2)).build(),
+                        TableContainerElementBuilder.create().setId("hm2DiagIfaceUtilizationControlInterval").build(),
+                        TableContainerElementBuilder.create().setId("hm2DiagIfaceUtilizationAlarmCondition").build())
+                .setSQLSelectStmt("SELECT * FROM HM2_DIAGNOSTIC_MIB.hm2DiagIfaceUtilizationEntry")
+                .setProvideIfConverter(true, false)
+                .build(), "\"HMFID_SW_RMON_002\" #isFeatureActive");
+
+        dp.addToMoreMenu(getClearPortStatisticsMenu());
+        dp.setAbstractContainer(tabs);
+
+        return dp;
+    }
+
+    private static class MauTypeEditorHook extends SQLGrid.EditorHook {
+
+        @Override
+        public TableEditor getEditor(SQLGrid grid, int row, int col) {
+            TableEditor editor;
+
+            NavigableResultSet.Entry currentEntry = grid.getStore().get(row);
+
+            switch (grid.getColumnName(col)) {
+                case "ifMauDefaultType":
+                    O2SAsMapConverter mauTypeConverter = new O2SAsMapConverter();
+                    BitSet mauType = BitSetUtils.toBitSet(currentEntry.getObject("ifMauTypeListBits", byte[].class));
+                    for (int i = 0; i < mauType.size(); i++) {
+                        if (mauType.get(i)) {
+                            mauTypeConverter.add(MauTypeConstants.getMauType(i).toString(), MauTypeConstants.getMauType(i).getMauTypeOid().toString());
+                        }
+                    }
+                    editor = new TableComboBoxEditor(mauTypeConverter);
+                    break;
+                case "hm2IfaceAutoPowerDown": {
+                    O2SAsMapConverter autoPowerDownConverter = new O2SAsMapConverter();
+                    BitSet portCapability = BitSetUtils.toBitSet(currentEntry.getObject("hm2IfacePortCapabilityBits", byte[].class));
+                    autoPowerDownConverter.add(WebIfResources.INSTANCE.getMibEnumTranslation(HM2_IFACE_AUTO_POWER_DOWN.NO_POWER_SAVE),
+                            HM2_IFACE_AUTO_POWER_DOWN.NO_POWER_SAVE.getValue());
+                    if (portCapability.get(HM2_DEVMGMT_MIB.HM2_IFACE_PORT_CAPABILITY_BITS.AUTO_POWER_DOWN.getPosition())) {
+                        autoPowerDownConverter.add(WebIfResources.INSTANCE.getMibEnumTranslation(HM2_IFACE_AUTO_POWER_DOWN.AUTO_POWER_DONE),
+                                HM2_IFACE_AUTO_POWER_DOWN.AUTO_POWER_DONE.getValue());
+                    }
+                    if (portCapability.get(HM2_DEVMGMT_MIB.HM2_IFACE_PORT_CAPABILITY_BITS.ENERGY_EFFICIENT_ETHERNET.getPosition())) {
+                        autoPowerDownConverter.add(WebIfResources.INSTANCE.getMibEnumTranslation(HM2_IFACE_AUTO_POWER_DOWN.AUTO_POWER_DONE),
+                                HM2_IFACE_AUTO_POWER_DOWN.ENERGY_EFFICIENT_ETHERNET.getValue());
+                    }
+                    editor = new TableComboBoxEditor(autoPowerDownConverter);
+                    break;
+                }
+                case "hm2IfaceCableCrossing": {
+                    O2SAsMapConverter cableCrossingConverter = new O2SAsMapConverter();
+                    BitSet portCapability = BitSetUtils.toBitSet(currentEntry.getObject("hm2IfacePortCapabilityBits", byte[].class));
+                    cableCrossingConverter.add(WebIfResources.INSTANCE.getMibEnumTranslation(HM2_IFACE_CABLE_CROSSING.MDI),
+                            HM2_IFACE_CABLE_CROSSING.MDI.getValue());
+                    if (portCapability.get(HM2_DEVMGMT_MIB.HM2_IFACE_PORT_CAPABILITY_BITS.MANUAL_MDIX.getPosition())) {
+                        cableCrossingConverter.add(WebIfResources.INSTANCE.getMibEnumTranslation(HM2_IFACE_CABLE_CROSSING.MDIX),
+                                HM2_IFACE_CABLE_CROSSING.MDIX.getValue());
+                    }
+                    if (portCapability.get(HM2_DEVMGMT_MIB.HM2_IFACE_PORT_CAPABILITY_BITS.AUTO_MDIX.getPosition())) {
+                        cableCrossingConverter.add(WebIfResources.INSTANCE.getMibEnumTranslation(HM2_IFACE_CABLE_CROSSING.AUTO_MDIX),
+                                HM2_IFACE_CABLE_CROSSING.AUTO_MDIX.getValue());
+                    }
+                    editor = new TableComboBoxEditor(cableCrossingConverter);
+                    break;
+                }
+                default:
+                    editor = super.getEditor(grid, row, col);
+                    break;
+            }
+            return editor;
+        }
+    }
+
+    private static MenuItem getClearPortStatisticsMenu() {
+        CustomMenuItem clearPortStatisticsMenu = new CustomMenuItem(WebIfResources.INSTANCE.getDialogString("dialog_port_menuItem_clearPortStatistics"));
+
+        clearPortStatisticsMenu.setHandler(new CustomSelectionHandler() {
+            @Override
+
+            public void onSelection(SelectionEvent event, DataPanel dp) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp) {
+
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup "
+                                + "SET " + MibEnumeration.Utils.asExpression(HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_PORT_STATS.FLUSHPORTSTATS),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+
+                }.run(1);
+
+            }
+        }
+        );
+
+        return clearPortStatisticsMenu;
+    }
+
+    public static DataPanelBuilder createRebootDialog(final ApplicationData applicationData) throws Exception {
+        final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_OPERATION_SET);
+
+        CustomHBoxLayoutContainer mainContainer = applicationData.getHBox().build();
+        CustomVerticalLayoutContainer centerContainer = applicationData.getVerticalLayoutContainerBuilder().build();
+        CustomHBoxLayoutContainer.setFlex(1);
+        mainContainer.add(new SimpleContainer()); // used for center
+        CustomHBoxLayoutContainer.resetFlex();
+        mainContainer.add(centerContainer);
+        CustomHBoxLayoutContainer.setFlex(1);
+        mainContainer.add(new SimpleContainer()); // used for center
+        CustomHBoxLayoutContainer.resetFlex();
+        VerticalFramedPanel restartPanel = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogTitle("reboot"));
+
+        final TextButton restartButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_coldStart"));
+
+        restartButton.addSelectHandler(new SelectEvent.SelectHandler() {
+
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(final AsyncCallback<Void> cb) {
+                        String query = "SELECT " + HM2_FILEMGMT_MIB.HM2_FM_NVM_STATE.NAME + " FROM HM2_FILEMGMT_MIB.hm2FileMgmtStatusGroup";
+
+                        dp.getConnection().createStatement().executeQuery(query, new MibStatement.SelectCB() {
+                            @Override
+                            public void onOk(List<NavigableResultSet> result) {
+                                cb.onSuccess(null);
+                                NavigableResultSet.Entry entry = result.get(0).getFirstEntry();
+                                if (HM2_FILEMGMT_MIB.HM2_FM_NVM_STATE.OUTOFSYNC.equals(HM2_FILEMGMT_MIB.HM2_FM_NVM_STATE.fromValue(entry.getObject(HM2_FILEMGMT_MIB.HM2_FM_NVM_STATE.NAME, Integer.class)))) {
+                                    ConfirmMessageBox saveMessageBox = new ConfirmMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_warning"), WebIfResources.INSTANCE.getDialogString("dialog_reboot_text_saveQuestion"));
+                                    saveMessageBox.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                                        @Override
+                                        public void onDialogHide(DialogHideEvent event) {
+                                            if (event.getHideButton().equals(Dialog.PredefinedButton.YES)) {
+                                                new DpFileManagementTask(getDataPanel(),
+                                                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.COPY,
+                                                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.CONFIG,
+                                                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.RUNNING_CONFIG,
+                                                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.NVM) {
+
+                                                    @Override
+                                                    protected void afterMessage() {
+                                                        restartDevice(dp, applicationData);
+                                                    }
+
+                                                }.run(1);
+
+                                            } else {
+                                                restartDevice(dp, applicationData);
+                                            }
+                                        }
+                                    });
+                                    saveMessageBox.show();
+                                } else {
+                                    restartDevice(dp, applicationData);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Exception ex) {
+                                cb.onFailure(ex);
+                            }
+                        });
+                    }
+                }.run(1);
+            }
+        });
+
+        if (applicationData.getAgent().isTrue("\"HMFID_SW_WATSON_004\" #isFeatureActive !")) {
+            restartPanel.add(restartButton);
+        }
+
+        centerContainer.add(restartPanel);
+
+        TextButton flushMACAddressTableButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_resetMACAddress"));
+        flushMACAddressTableButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup SET hm2DevMgmtActionFlushFDB = " + HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_FDB.FLUSHFDB.getValue(),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+
+                    }
+                }.run(1);
+            }
+        });
+
+        centerContainer.add(flushMACAddressTableButton);
+
+        TextButton flushARPTableButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_resetARP"));
+        flushARPTableButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup SET hm2DevMgmtActionFlushARP = " + HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_ARP.FLUSHARP.getValue(),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+                }.run(1);
+            }
+        });
+        centerContainer.add(flushARPTableButton);
+
+        TextButton portCounterButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_resetPortCounter"));
+        portCounterButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup "
+                                + "SET " + MibEnumeration.Utils.asExpression(HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_PORT_STATS.FLUSHPORTSTATS),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+                }.run(1);
+            }
+        });
+        centerContainer.add(portCounterButton);
+
+        TextButton igmpResetButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_resetIGS"));
+        igmpResetButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup SET " + MibEnumeration.Utils.asExpression(HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_IGS.FLUSHIGS),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+                }.run(1);
+            }
+        });
+        centerContainer.add(igmpResetButton, "\"HMFID_SW_IGS\" #isFeatureActive");
+
+        TextButton delLogButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_delLogs"));
+        delLogButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DpFileManagementTask(dp.preBuild(),
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.CLEAR,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.EVENTLOG,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.SYSTEM,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.SYSTEM).run(1);
+            }
+        });
+
+        centerContainer.add(delLogButton);
+
+        TextButton delPersistantLogButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_delPersistantLog"));
+
+        delPersistantLogButton.addSelectHandler(new SelectEvent.SelectHandler() {
+
+            @Override
+            public void onSelect(SelectEvent event) {
+
+                new DpFileManagementTask(dp.preBuild(),
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.CLEAR,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.EVENTLOG,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.NVM,
+                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.NVM).run(1);
+            }
+        });
+
+        centerContainer.add(delPersistantLogButton, "\"HMFID_SW_LOG_003\" #isFeatureActive");
+
+        TextButton flushFirewallButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_flushFW"));
+        flushFirewallButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_FW_MIB.hm2FwGeneralSettings SET hm2ResetStatistics = " + HM2_TC_MIB.HM_ACTION_VALUE.ACTION.getValue(),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+
+                }.run(1);
+            }
+        });
+        centerContainer.add(flushFirewallButton, "\"HMFID_SW_FIREWALL\" #isFeatureActive");
+
+        TextButton clearEmailNotificationsButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_clearEmailNotifications"));
+        clearEmailNotificationsButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup SET " + MibEnumeration.Utils.asExpression(HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_EMAIL_LOG_STATS.FLUSHEMAILLOGCOUNTERS),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+                }.run(1);
+            }
+        });
+        centerContainer.add(clearEmailNotificationsButton, "\"HMFID_SW_LOG_008\" #isFeatureActive");
+
+        TextButton clearACLHitCountsButton = new TextButton(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_clearACLHitCounts"));
+        clearACLHitCountsButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                    @Override
+                    protected void callService(AsyncCallback<Void> cb) {
+                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup "
+                                + "SET " + MibEnumeration.Utils.asExpression(HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_ACL_STATS.FLUSH_ACL_STATS, HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_FLUSH_ACL_STATS.FLUSH_ACL_MAC_STATS),
+                                Utils.convertAsyncCallbackToDmlCB(cb));
+                    }
+                }.run(1);
+            }
+        });
+        centerContainer.add(clearACLHitCountsButton, "\"HMFID_SW_ACL_008\" #isFeatureActive");
+
+        RecordContainer rc;
+        rc = applicationData.getRecordContainerBuilder()
+                .setContentWidget(mainContainer)
+                .setSQLSelectStmt("SELECT hm2DevMgmtActionDelayCurrent FROM HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup")
+                .setAttributeNames(RecordContainerElementBuilder.create()
+                        .setParentWidget(restartPanel)
+                        .setId("hm2DevMgmtActionDelayCurrent")
+                        .setEditor(new TextFieldEditor(new ChainConverter<>(I2LConverter.INSTANCE, L2LAsMinutesConverter.INSTANCE, L2SAsDurationConverter.INSTANCE)))
+                        .setVisible("\"HMFID_SW_WATSON_004\" #isFeatureActive")
+                        .build())
+                .setAddWidgetHook(new RecordContainer.AddWidgetHook() {
+
+                    @Override
+                    public void add(String columnId, HBoxLayoutContainer field, HasWidgets parent, DataPanel dp) {
+                        final TextButton restoreButton = new TextButton(WebIfResources.INSTANCE.getDialogString("global_string_cancel"));
+                        restoreButton.addSelectHandler(new SelectEvent.SelectHandler() {
+                            @Override
+                            public void onSelect(SelectEvent event) {
+
+                                new DataPanel.DataPanelAsyncRunner<Void>(dp) {
+                                    @Override
+                                    protected void callService(AsyncCallback<Void> cb) {
+                                        dp.getConnection().createStatement().execute("UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup SET hm2DevMgmtActionDelayPreset = 0",
+                                                Utils.convertAsyncCallbackToDmlCB(cb));
+                                    }
+                                }.run(1);
+                            }
+                        });
+                        field.add(restoreButton);
+                        parent.add(field);
+                        parent.add(restartButton);
+                    }
+                })
+                .build();
+
+        dp.setAbstractContainer(rc);
+
+        return dp;
+    }
+
+    private static void restartDevice(final DataPanelBuilder dp, final ApplicationData applicationData) {
+
+        if (applicationData.getAgent().isTrue("\"HMFID_SW_WATSON_004\" #isFeatureActive")) {
+            final PromptMessageBox delayBox = new PromptMessageBox(WebIfResources.INSTANCE.getDialogString("dialog_reboot_button_coldStart"), WebIfResources.INSTANCE.getColumnIdTranslation("hm2DevMgmtActionDelayPreset"));
+            delayBox.getTextField().setValue("00:00:00");
+
+            delayBox.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                @Override
+                public void onDialogHide(DialogHideEvent event) {
+                    if (event.getHideButton() == Dialog.PredefinedButton.OK) {
+                        String value = delayBox.getValue().replaceAll("\\s", "");
+                        final Integer intValue = convertHHMMSSToSeconds(value);
+                        if (intValue != null) {
+
+                            new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+
+                                @Override
+                                protected void callService(AsyncCallback<Void> cb) {
+                                    dp.getConnection().createStatement().execute(
+                                            "UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup SET "
+                                            + SQLUtils.toUpdateString(Arrays.asList(new Pair("hm2DevMgmtActionDelayPreset", intValue),
+                                                    new Pair("hm2DevMgmtActionReset", HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_RESET.RESET.getValue()))),
+                                            Utils.convertAsyncCallbackToDmlCB(cb));
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    //Only in case of a non delayed reboot
+                                    if (intValue == 0) {
+
+                                        // close the connection to trigger a close failed event.
+                                        applicationData.getAgent().getConnection().close(new hmi.network.base.callback.AsyncCallback() {
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Object t) {
+                                            }
+                                        });
+
+                                        ReachabilityChecker c = new ReachabilityChecker(applicationData.getProtocol(), applicationData.getHost());
+                                        c.isReachable(new ReachabilityChecker.ReachableListener() {
+
+                                            @Override
+                                            public void isReachable(boolean newValue, boolean oldValue) {
+                                                if (!newValue && oldValue) {
+                                                    RootLayoutPanel.get().clear();
+                                                    RootLayoutPanel.get().add(applicationData.getRebootProgressWidgetBuilder().build());
+                                                } else if (newValue) {
+                                                    // discard dialog anchor and trigger reload
+                                                    Window.Location.replace(
+                                                            Window.Location.createUrlBuilder()
+                                                                    .setHash(null)
+                                                                    .buildString());
+                                                }
+                                            }
+
+                                            @Override
+                                            public void error(Throwable throwable) {
+                                                onFailure(throwable);
+                                            }
+
+                                        });
+                                    }
+
+                                }
+
+                            }.run(1);
+
+                        } else {
+                            Info.display(WebIfResources.INSTANCE.getDialogString("global_string_error"), WebIfResources.INSTANCE.getDialogString("dialog_reboot_text_wrongFormat"));
+                        }
+                    }
+                }
+
+            });
+            delayBox.show();
+
+        } else {
+            ConfirmMessageBox restartBox = new ConfirmMessageBox(WebIfResources.INSTANCE.getDialogString("global_string_warning"), WebIfResources.INSTANCE.getDialogString("dialog_reboot_text_restartQuestion"));
+            restartBox.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                @Override
+                public void onDialogHide(DialogHideEvent event) {
+                    if (event.getHideButton().equals(Dialog.PredefinedButton.YES)) {
+                        new DataPanel.DataPanelAsyncRunner<Void>(dp.preBuild()) {
+                            @Override
+                            protected void callService(final AsyncCallback<Void> cb) {
+                                dp.getConnection().createStatement().execute(
+                                        "UPDATE HM2_DEVMGMT_MIB.hm2DeviceMgmtActionGroup "
+                                        + "SET " + MibEnumeration.Utils.asExpression(HM2_DEVMGMT_MIB.HM2_DEV_MGMT_ACTION_RESET.RESET),
+                                        Utils.convertAsyncCallbackToDmlCB(cb));
+                            }
+                        }.run(1);
+                    }
+                }
+            });
+            restartBox.show();
+        }
+    }
+
+    private static Integer convertHHMMSSToSeconds(String timeHHMMSS) {
+        Pattern pattern = Pattern.compile("^(\\d{1,3})\\:([0-5][0-9])\\:([0-5][0-9])$");
+        Matcher matcher = pattern.matcher(timeHHMMSS);
+        if (matcher.matches()) {
+            Integer seconds = Integer.valueOf(matcher.group(1)) * 3600
+                    + Integer.valueOf(matcher.group(2)) * 60
+                    + Integer.valueOf(matcher.group(3));
+
+            return seconds;
+        }
+
+        return null;
+    }
+
+    private static class DeviceTypeColumnMapper extends AbstractColumnMapper<String> {
+
+        @Override
+        public String join(Map<String, Object> value) {
+            return value.get("hm2DevMgmtProductDescr") + " HW: " + value.get("hm2DevMgmtHwVersion");
+        }
+
+        @Override
+        public List<String> getColumnNames() {
+            return Arrays.asList("hm2DevMgmtProductDescr", "hm2DevMgmtHwVersion");
+        }
+
+    }
+
+    private static class MauTypeColumnMapper extends AbstractColumnMapper<String> {
+
+        @Override
+        public List getColumnNames() {
+            return Arrays.asList("ifMauType", "ifMauMediaAvailable");
+        }
+
+        @Override
+        public String join(Map value) {
+            if (!value.get("ifMauMediaAvailable").equals(MAU_MIB.IF_MAU_MEDIA_AVAILABLE.AVAILABLE)) {
+                return S2SAsMauTypeConverter.MAU_NOTAVAILABLE_OID;
+            }
+
+            return (String) value.get("ifMauType");
+        }
+
+    }
+
+    private static TextFieldWithWidgetEditor createStatusCounterEditor(String columnId) {
+        StyleInjector.inject(".counterIcon:hover {filter: drop-shadow(1px 1px 1px)}");
+        Image image = new Image(ImageResources.INSTANCE.getImages().getInfo());
+        image.getElement().addClassName("counterIcon");
+        return new TextFieldWithWidgetEditor(image, (Map<String, Object> value) -> ((Integer) value.get(columnId)) > 0);
+    }
+
+}
