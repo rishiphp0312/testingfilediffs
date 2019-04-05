@@ -615,6 +615,8 @@ public class GeneralDialogs {
         return dp;
     }
 
+
+
     private static class NetworkGuiHook extends AbstractContainer.GuiHook<RecordContainer> {
 
         @Override
@@ -845,50 +847,75 @@ public class GeneralDialogs {
         return dp;
     }
 
+    public static DataPanelBuilder createUsbOutOfBandManagement(final ApplicationData applicationData) throws Exception {
 
+        final DataPanelBuilder dp;
+        dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
 
-    public static DataPanelBuilder createusbOutOfBandManagement(final ApplicationData applicationData) throws Exception {
-               final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
-               CustomVBoxLayoutContainer mainContainer = applicationData.getVBox().build();
+        CustomVBoxLayoutContainer mainContainer = applicationData.getVBox().build();
+
         final VerticalFramedPanel operationFrame = OperationFramedPanel.create();
         mainContainer.add(operationFrame, "\"HMFID_SW_HWE_009\" #isFeatureActive !");
         final VerticalFramedPanel managementInterfaceFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_managementInterface"));
         mainContainer.add(managementInterfaceFrame, "\"HMFID_SW_HWE_009\" #isFeatureActive !");
         final VerticalFramedPanel ipParameterFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_ipParameter"));
         mainContainer.add(ipParameterFrame);
+
         SortedMap<Object, String> mgmtProtocol = new TreeMap<>();
         mgmtProtocol.put(1, WebIfResources.INSTANCE.getDialogString("global_string_local"));
         mgmtProtocol.put(3, WebIfResources.INSTANCE.getDialogString("global_string_dhcp"));
+
         RecordContainer rc = applicationData.getRecordContainerBuilder().setContentWidget(mainContainer).
-                setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtAdminState").setDescription("").setEditor(DialogUtilities.createOperationIntRadioButtonEditor()).
-                        setParentWidget(operationFrame).build(),
-
-                       RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtDeviceMacAddress").
-                               setParentWidget(managementInterfaceFrame).build(),
-
-                                   //RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtAdminState").setParentWidget(managementInterfaceFrame).build(),
-
-                       Utils.createIPv4InetAddressElement("oobIpAddress", "hm2NetOobUsbMgmtIPAddr", "hm2NetOobUsbMgmtIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True),
-                        RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtPrefixLength").setEditor(new TextFieldEditor(L2SAsNetmaskConverter.INSTANCE)).
-                                setParentWidget(ipParameterFrame).build()
-                                )
+                setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtAdminState").setDescription("").setEditor(DialogUtilities.createOperationIntRadioButtonEditor()).setParentWidget(operationFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtDeviceMacAddress").setParentWidget(managementInterfaceFrame).build(),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtHostMacAddress").setParentWidget(managementInterfaceFrame).build(),
+                        Utils.createIPv4InetAddressElement("oobIpAddress", "hm2NetOobUsbMgmtIPAddr","hm2NetOobUsbMgmtIPAddrType", ipParameterFrame, RecordContainerElement.Writable.True),
+                        RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtPrefixLength").setEditor(new TextFieldEditor(L2SAsNetmaskConverter.INSTANCE)).setParentWidget(ipParameterFrame).build() )
                 .setSQLSelectStmt("SELECT hm2NetOobUsbMgmtAdminState, "
-                       + "hm2NetOobUsbMgmtDeviceMacAddress, "
+                        + "hm2NetOobUsbMgmtDeviceMacAddress, "
+                        + "hm2NetOobUsbMgmtHostMacAddress, "
                         + "hm2NetOobUsbMgmtIPAddrType, "
-                        + "hm2NetOobUsbMgmtIPAddr, "
+            + "hm2NetOobUsbMgmtIPAddr, "
                         + "hm2NetOobUsbMgmtPrefixLength "
-                       // + "hm2NetOobMgmtGatewayIPAddrType, "
-                      // + "hm2NetOobMgmtGatewayIPAddr, "
-                      //  + "hm2NetOobMgmtAction "
                         + "FROM HM2_NETCONFIG_MIB.hm2NetOobUsbMgmtGroup")
                 .setGuiHook(new OutOfBandGuiHook())
                 .build();
 
         dp.setAbstractContainer(rc);
-       return dp;
-
+        return dp;
     }
 
+    /*
+    public static DataPanelBuilder createOldUsbOutOfBandDialog(final ApplicationData applicationData) throws Exception {
+        final DataPanelBuilder dp = applicationData.getDataPanelBuilder().setOperationSet(Operation.LOAD_WRITE_OPERATION_SET);
+
+        CustomVBoxLayoutContainer mainContainer = applicationData.getVBox().build();
+
+        final VerticalFramedPanel operationFrame = OperationFramedPanel.create();
+        mainContainer.add(operationFrame, "\"HMFID_SW_HWE_009\" #isFeatureActive !");
+        final VerticalFramedPanel managementInterfaceFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_managementInterface"));
+        mainContainer.add(managementInterfaceFrame, "\"HMFID_SW_HWE_009\" #isFeatureActive !");
+        final VerticalFramedPanel ipParameterFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_outOfBand_frame_ipParameter"));
+        mainContainer.add(ipParameterFrame);
+
+        SortedMap<Object, String> mgmtProtocol = new TreeMap<>();
+        mgmtProtocol.put(1, WebIfResources.INSTANCE.getDialogString("global_string_local"));
+        mgmtProtocol.put(3, WebIfResources.INSTANCE.getDialogString("global_string_dhcp"));
+
+        RecordContainer rc = applicationData.getRecordContainerBuilder().setContentWidget(mainContainer).
+                setAttributeNames(RecordContainerElementBuilder.create().setId("hm2NetOobUsbMgmtDeviceMacAddress").setParentWidget(managementInterfaceFrame).build()
+     )
+                .setSQLSelectStmt(
+                        "SELECT hm2NetOobUsbMgmtAdminState, "
+                        + "hm2NetOobUsbMgmtDeviceMacAddress "
+                        + "FROM HM2_NETCONFIG_MIB.hm2NetOobUsbMgmtGroup")
+                .setGuiHook(new OutOfBandGuiHook())
+                .build();
+
+        dp.setAbstractContainer(rc);
+        return dp;
+    }
+     */
     private static class OutOfBandGuiHook extends AbstractContainer.GuiHook<RecordContainer> {
 
         @Override
@@ -1025,19 +1052,19 @@ public class GeneralDialogs {
             final VerticalFramedPanel updateFrame = new VerticalFramedPanel(WebIfResources.INSTANCE.getDialogString("dialog_software_frame_softwareUpdate"));
             c.add(updateFrame);
             updateFrame.add(applicationData.getFileUploadWidgetBuilder()
-                .setFileManagementTask(new DpFileManagementTask(dp.preBuild(),
-                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.COPY,
-                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.FIRMWARE,
-                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.SERVER,
-                        HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.SYSTEM))
-                .setURLBuilder(URLBuilder.create()
-                        .setAbsoluteURL(applicationData.getProtocol(), applicationData.getHost())
-                        .setMode(URLBuilder.Mode.UPLOAD)
-                        .setFileType(URLBuilder.FileType.FIRMWARE)
-                        .setLocation(URLBuilder.Location.NMV))
-                .setConnection(dp.getConnection())
-                .setAcceptedFiles(".bin")
-                .build());
+                    .setFileManagementTask(new DpFileManagementTask(dp.preBuild(),
+                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_TYPE.COPY,
+                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_ITEM_TYPE.FIRMWARE,
+                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_SOURCE_TYPE.SERVER,
+                            HM2_FILEMGMT_MIB.HM2_FM_ACTION_DESTINATION_TYPE.SYSTEM))
+                    .setURLBuilder(URLBuilder.create()
+                            .setAbsoluteURL(applicationData.getProtocol(), applicationData.getHost())
+                            .setMode(URLBuilder.Mode.UPLOAD)
+                            .setFileType(URLBuilder.FileType.FIRMWARE)
+                            .setLocation(URLBuilder.Location.NMV))
+                    .setConnection(dp.getConnection())
+                    .setAcceptedFiles(".bin")
+                    .build());
         }
 
         TabbedPane tabbedPane = applicationData.getTabbedPaneBuilder().build();
